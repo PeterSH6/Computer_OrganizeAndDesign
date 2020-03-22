@@ -9,11 +9,11 @@ input [2:0] opcode;
 reg[31:0] c;
 reg[2:0] d;//d[0]:zero flag,d[1]:overflow flag, d[2]:negtive flag
 
-reg[5:0];//used for iterate;
+reg[5:0] ii;//used for iterate;
 reg cf;
-reg[32:0] temp//used for add
-reg[31:0] multiplicand
-reg[64:0] mul_temp//used for product
+reg[32:0] temp;//used for add
+reg[31:0] multiplicand;
+reg[64:0] mul_temp;//used for product
 
 
 parameter  sla = 3'b000,
@@ -31,7 +31,7 @@ begin
     sla:
         begin
         c[0] = 1'b0;
-        for(ii = 1; i < 32 ; ii++)
+        for(ii = 1; ii < 32 ; ii = ii+1)
             c[ii] = a[ii - 1];
         if(a[30:0] == 31'b0000_0000_0000_0000_0000_0000_0000_000)
             d[0] = 1'b1; //set zero flag
@@ -47,7 +47,7 @@ begin
     sra:
         begin
         c[31] = a[31];
-        for(ii = 0 ; i < 31 ; ii++)
+        for(ii = 0 ; ii < 31 ; ii = ii+1)
             c[ii] = a[ii+1];
         if(a[31:1] == 31'b0000_0000_0000_0000_0000_0000_0000_000)
             d[0] = 1'b1; //set zero flag
@@ -95,9 +95,9 @@ begin
         
     mul:
         begin
-        multiplicand = (~a + 1 > a) ? a : (~a + 1);
-        mul_temp = {33'd0,(~b + 1 > b) ? b : (~b + 1)};
-        for(ii = 0 ; i < 31 ; i++)
+        multiplicand = (~a + 1'b1 > a) ? a : (~a + 1'b1);
+        mul_temp = {33'd0,(~b + 1'b1 > b) ? b : (~b + 1'b1)};
+        for(ii = 0 ; ii < 31 ; ii = ii+1)
             begin
             if(mul_temp[0])
                 begin

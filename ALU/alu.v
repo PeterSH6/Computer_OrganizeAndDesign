@@ -95,7 +95,7 @@ begin
         
     mul:
         begin
-        multiplicand = (~a + 1'b1 > a) ? a : (~a + 1'b1);
+        multiplicand = (~a + 1'b1 > a) ? a : (~a + 1'b1);//convert to postive
         mul_temp = {33'd0,(~b + 1'b1 > b) ? b : (~b + 1'b1)};
         for(ii = 0 ; ii < 31 ; ii = ii+1)
             begin
@@ -114,6 +114,7 @@ begin
             d[0] = 1'b0;
         d[2] = a[31]^b[31];
         d[1] = (mul_temp[63:32] == 32'b0000_0000_0000_0000_0000_0000_0000_0000)  ? 0:1;
+        //used up 32 bits to identify overflow
         end
     andd:
         begin

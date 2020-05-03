@@ -14,6 +14,7 @@
 `define ALU_SUB   4'b0110 
 `define ALU_SLT   4'b0111
 `define ALU_SRL   4'b1000
+`define ALU_SGT   4'b1001
 `define ALU_SLTU  4'b1100 
 `define ALU_NOR   4'b1101
 `define ALU_XOR   4'b1110
@@ -83,3 +84,5 @@
 `define ALUOP_SLTI  4'b1000
 `define ALUOP_LUI   4'b1001
 `define ALUOP_SGT   4'b1010
+`define ALUOP_SLTIU 4'b1011
+`define ALUOP_BNE   4'b1100

@@ -7,12 +7,13 @@ module MIPS_tb();
     initial
         begin
             clk = 1;
-            reset = 1;
+            rst = 1;
             #5
-            reset = 0;
+            rst = 0;
             #20
-            reset = 1;
+            rst = 1;
         end
 
     always
         #(50) clk = ~clk;
+endmodule

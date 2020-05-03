@@ -49,7 +49,7 @@ module MIPS(clk,rst);
     //MUX
     wire [4:0]writeRegister;
     wire reg_ra = 5'b11111;
-    mux4_5 RegDst(.d0(Instruction[20:16]),.d1(Instruction[15:11]),.d2(reg_ra),.s(RegDst),.y(writeRegister));//5位 2选1
+    mux4_5 muxRegDst(.d0(Instruction[20:16]),.d1(Instruction[15:11]),.d2(reg_ra),.s(RegDst),.y(writeRegister));//5位 2选1
     
     //WriteBack MUX
     wire [31:0]PCPLUS4;
@@ -73,20 +73,21 @@ module MIPS(clk,rst);
 
     //MUX R-lw,sw
     wire [31:0]ALUData2;
-    mux2 ALUSrc(.d0(ReadData2),.d1(extended),.d2(32'b0),.s(ALUSrc),.y(ALUData2));
+    mux2 muxALUSrc(.d0(ReadData2),.d1(extended),.d2(32'b0),.s(ALUSrc),.y(ALUData2));
 
     //ALUControl
-    wire [3:0] ALU_Control
+    wire [3:0] ALU_Control;
     wire PCSrc2;
     wire ShiftSrc2;
     ALUControl my_alucontrol(.ALUOp(ALUOp),.Funct(Instruction[5:0]),.ALU_Control(ALU_Control),.PCSrc2(PCSrc2),.ShiftSrc(ShiftSrc2));
 
-    PCSrc = PCSrc1 & PCSrc2;
+    assign PCSrc = PCSrc1 & PCSrc2;
 
     //MUX ALUSrc1
-    wire ShiftSrc = ShiftSrc1 & ShiftSrc2;
+    wire ShiftSrc;
+    assign ShiftSrc = ShiftSrc1 & ShiftSrc2;
     wire ReadDataF1;
-    mux2 muxALUSrc1(.d0(ReadData1),d1({27'b0,Instruction[10:6]}),.s(ShiftSrc),.y(ReadDataF1));
+    mux2 muxALUSrc1(.d0(ReadData1),.d1({27'b0,Instruction[10:6]}),.s(ShiftSrc),.y(ReadDataF1));
 
     //ALU
     wire Zero;
@@ -97,31 +98,33 @@ module MIPS(clk,rst);
     mux2_1 my_muxbranchsrc(.d0(Zero),.d1(ALUResult[0]),.s(BranchSrc),.y(branchsrc_o));
 
     //Not
-    reg Not_o = (Not) ? (~branchsrc_o) : branchsrc_o;
+    wire Not_o ;
+    assign Not_o = (Not) ? (~branchsrc_o) : branchsrc_o;
 
     //NPC
-    wire Branch1 = Zero & Not_o;//与门 beq
+    wire Branch1;
+    assign Branch1 = Zero & Not_o;//与门 beq
     NPC my_NPC(.PC(o_PC),.Jump(Jump),.Branch(Branch1),.IMM(Instruction[25:0]),.NPC(i_PC),.PCPLUS4_o(PCPLUS4));
     
     //DM
-    wire MemData;//read data
-    DM my_DM(.clk(clk),.MemR(MemRead),.MemWr(MemWrite),.addr(ALUResult),.data(ReadData2),.ReadData(MemData));
+    wire [31:0] MemData;//read data
+    DM my_DM(.MemR(MemRead),.MemWr(MemWrite),.addr(ALUResult),.data(ReadData2),.ReadData(MemData));
     
     //EXT8-32 for lb,lbu
     wire EXTOp_b;
-    wire MemData_ex8;
-    EXT8 my_EXT8(.Imm8(MemData[7:0]),.EXTOp(EXTOp_b),.Imm32(MemData_ex8));
+    wire MemData_8;
+    EXT8 my_EXT8(.Imm8(MemData[7:0]),.EXTOp(EXTOp_b),.Imm32(MemData_8));
 
     //EXT16-32 for lh,lhu
     wire EXTOp_h;
-    wire MemData_ex16;
-    EXT16 my_EXT16(.Imm16(MemData[15:0]),.EXTOp(EXTOp_h),.Imm32(MemData_ex16));
+    wire MemData_16;
+    EXT16 my_EXT16(.Imm16(MemData[15:0]),.EXTOp(EXTOp_h),.Imm32(MemData_16));
     
     //MUX 3to1
     wire [1:0] mux_bhw;
     wire [31:0] LoadData;
     mux4 my_mux4(.d0(MemData),.d1(MemData_ex8),.d2(MemData_ex16),.s(mux_bhw),.y(LoadData)); //3--1
-        
+
     //MUX Mem2Reg
     mux2 Mem2Reg(.d0(LoadData),.d1(ALUResult),.s(MemtoReg),.y(WriteData));
 

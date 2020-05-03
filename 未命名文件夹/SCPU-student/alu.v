@@ -9,7 +9,7 @@ module alu(A, B, ALUOp, C, Zero);
    
    reg [31:0] C;
    integer    i;
-   integer   Ai = A;
+   //integer   Ai = A;
    always @( * ) begin
       case ( ALUOp )
           `ALU_NOP:  C = A;                          // NOP
@@ -23,9 +23,9 @@ module alu(A, B, ALUOp, C, Zero);
           `ALU_SGT:  C = (A > B) ? 32'd1 : 32'd0;    // SGT/SGTI
           `ALU_SLTU: C = ({1'b0, A} < {1'b0, B}) ? 32'd1 : 32'd0; //SLTU/SLTUI
           `ALU_LUI:  C = {B[15:0],16'b0};            //LUI
-          `ALU_SLL:  C = {B[31-Ai:0],{{Ai}0}};
-          `ALU_SRA:  C = {{Ai{B[31]}},B[31:Ai]};
-          `ALU_SRL:  C = {{Ai{0}},B[31:Ai]};
+          `ALU_SLL:  C = B << A;
+          `ALU_SRA:  C = B >>> A;
+          `ALU_SRL:  C = B >> A;
           default:   C = A;                          // Undefined
       endcase
    end // end always

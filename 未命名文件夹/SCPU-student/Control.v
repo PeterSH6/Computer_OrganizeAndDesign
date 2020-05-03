@@ -218,7 +218,7 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
-                end;
+                end
             `OP_lb:
                 begin
                 RegDst = 2'b00;
@@ -239,7 +239,7 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
-                end;
+                end
             `OP_lbu:
                 begin
                 RegDst = 2'b00;
@@ -260,7 +260,7 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
-                end;
+                end
             `OP_lh:
                 begin
                 RegDst = 2'b00;
@@ -281,7 +281,7 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
-                end;
+                end
             `OP_lhu:
                 begin
                 RegDst = 2'b00;
@@ -302,7 +302,7 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
-                end;
+                end
             `OP_sw:
                 begin
                 RegDst = 2'b00;
@@ -323,7 +323,7 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
-                end;
+                end
             `OP_beq:
                 begin
                 RegDst = 2'b00;
@@ -466,7 +466,7 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 EXTOP1 = 1'b0;
                 EXTOP_b = 1'b0;
                 EXTOP_h = 1'b0;
-                ALUOp = `ALU_NOP;
+                ALUOp = 4'bxxxx;
                 BranchSrc = 1'bx;
                 Not = 1'bx;
                 mux_bhw = 2'b00;
@@ -487,7 +487,7 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 EXTOP1 = 1'b0;
                 EXTOP_b = 1'b0;
                 EXTOP_h = 1'b0;
-                ALUOp = `ALU_NOP;
+                ALUOp = 4'bxxxx;
                 BranchSrc = 1'bx;
                 Not = 1'bx;
                 mux_bhw = 2'b00;

@@ -21,7 +21,7 @@ module ALUControl(ALUOp,Funct,ALU_Control,PCSrc2,ShiftSrc);
             PCSrc2 = 1'b0;
             ShiftSrc = 1'b0;
             end
-        `ALU_Rtype: //R-type
+        `ALUOP_Rtype: //R-type
             begin
             case(Funct)
                 `funct_add:
@@ -135,7 +135,7 @@ module ALUControl(ALUOp,Funct,ALU_Control,PCSrc2,ShiftSrc);
             end
         `ALUOP_ANDI: //andi
             begin
-            ALU_Control = `ALU_ANDI;
+            ALU_Control = `ALU_AND;
             PCSrc2 = 1'b0;
             end
         `ALUOP_ORI: //ori
@@ -167,7 +167,7 @@ module ALUControl(ALUOp,Funct,ALU_Control,PCSrc2,ShiftSrc);
             begin
             ALU_Control = `ALU_SUB;
             PCSrc2 = 1'b0;
-            end;
+            end
         `ALUOP_BNE:
             begin
             ALU_Control = `ALU_SUB;

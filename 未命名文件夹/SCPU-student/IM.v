@@ -3,7 +3,17 @@ module IM(
     output reg[31:0] Instruction
 );
     reg[31:0] Instruction_Memory[255:0];
-    integer i,count,fp,regist;
+    //integer i,count,fp,regist;   
+    initial 
+    begin
+        $readmemh("mipstestloop_sim.txt", Instruction_Memory);
+    end
+    always@(*)
+    begin
+        assign Instruction = Instruction_Memory[PC>>2];
+    end
+endmodule
+   /* 
     initial
         begin
         for(i = 0 ; i < 256 ; i++)
@@ -19,9 +29,4 @@ module IM(
                 i = i + 1;
                 end
             end
-        $fclose(fp);
-    always@(*)
-    begin
-        assign Instruction = Instruction_Memory[PC>>2];
-    end
-endmodule
+        $fclose(fp);*/

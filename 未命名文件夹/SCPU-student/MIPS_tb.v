@@ -6,5 +6,13 @@ module MIPS_tb();
     MIPS my_MIPS(.clk(clk),.rst(rst));
     initial
         begin
-            
+            clk = 1;
+            reset = 1;
+            #5
+            reset = 0;
+            #20
+            reset = 1;
         end
+
+    always
+        #(50) clk = ~clk;

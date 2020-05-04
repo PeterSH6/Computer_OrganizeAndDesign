@@ -10,10 +10,7 @@ module MIPS_tb();
             rst = 1;
             #5
             rst = 0;
-            #20
-            rst = 1;
         end
-
     always
         #(50) clk = ~clk;
 endmodule

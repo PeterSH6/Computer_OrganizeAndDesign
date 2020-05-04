@@ -1,9 +1,10 @@
 `include "ctrl_encode_def.v"
-module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc,RegWrite,,EXTOP1,EXTOP_b,EXTOP_h,mux_bhw,BranchSrc,Not,WriteBackSrc,PCSrc1,ShiftSrc1);
+module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc,RegWrite,EXTOP1,EXTOP_b,EXTOP_h,mux_bhw,BranchSrc,Not,WriteBackSrc,PCSrc1,ShiftSrc1);
     input [5:0] OP;
     input [4:0] Inst;
-    output reg Jump,Branch,MemRead,MemtoReg,MemWrite,ALUSrc,RegWrite,EXTOP1,EXTOP_b,EXTOP_h,BranchSrc,Not,WriteBackSrc,PCSrc1,ShiftSrc1;
+    output reg Jump,Branch,MemRead,MemtoReg,MemWrite,RegWrite,EXTOP1,EXTOP_b,EXTOP_h,BranchSrc,Not,WriteBackSrc,PCSrc1,ShiftSrc1;
     output reg [3:0] ALUOp;
+    output reg [1:0] ALUSrc;
     output reg [1:0] RegDst;
     output reg [1:0] mux_bhw;
     always@(*)
@@ -211,7 +212,7 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 EXTOP_b = 1'bx;
                 EXTOP_h = 1'bx;
                 BranchSrc = 1'bx;
-                Not = 1'bx;
+                Not = 1'b0;
                 ALUOp = `ALUOP_LS;
                 ALUSrc = 2'b01;
                 mux_bhw = 2'b00;
@@ -488,8 +489,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 EXTOP_b = 1'b0;
                 EXTOP_h = 1'b0;
                 ALUOp = 4'bxxxx;
-                BranchSrc = 1'bx;
-                Not = 1'bx;
+                BranchSrc = 1'b0; //必须保证branch为0
+                Not = 1'b0;
                 mux_bhw = 2'b00;
                 WriteBackSrc = 1'b1;
                 PCSrc1 = 1'b0;

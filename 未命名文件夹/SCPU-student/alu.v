@@ -1,6 +1,5 @@
 `include "ctrl_encode_def.v"
-
-module alu(A, B, ALUOp, C, Zero);
+module alu(A,B,ALUOp,C,Zero);
            
    input  signed [31:0] A, B;
    input         [3:0]  ALUOp;

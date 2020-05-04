@@ -1,11 +1,11 @@
 `include "ctrl_encode_def.v"
-module ALUControl(ALUOp,Funct,ALU_Control,PCSrc2,ShiftSrc);
-
+module ALUControl(ALUOp,Funct,ALU_Control,PCSrc2,ShiftSrc,WriteBackSrc2);
     input [3:0] ALUOp;
     input [5:0] Funct;
     output reg[3:0] ALU_Control;
     output reg PCSrc2;
     output reg ShiftSrc;
+    output reg WriteBackSrc2;
     
     initial
         begin
@@ -20,6 +20,7 @@ module ALUControl(ALUOp,Funct,ALU_Control,PCSrc2,ShiftSrc);
             ALU_Control = `ALU_ADD;
             PCSrc2 = 1'b0;
             ShiftSrc = 1'b0;
+            WriteBackSrc2 = 1'b0;
             end
         `ALUOP_Rtype: //R-type
             begin
@@ -29,102 +30,119 @@ module ALUControl(ALUOp,Funct,ALU_Control,PCSrc2,ShiftSrc);
                     ALU_Control = `ALU_ADD;
                     PCSrc2 = 1'b0;
                     ShiftSrc = 1'b0;
+                    WriteBackSrc2 = 1'b0;
                     end
                 `funct_addu:
                     begin
                     ALU_Control = `ALU_ADD;
                     PCSrc2 = 1'b0;
                     ShiftSrc = 1'b0;
+                    WriteBackSrc2 = 1'b0;
                     end
                 `funct_sub:
                     begin
                     ALU_Control = `ALU_SUB;
                     PCSrc2 = 1'b0;
                     ShiftSrc = 1'b0;
+                    WriteBackSrc2 = 1'b0;
                     end
                 `funct_subu:
                     begin
                     ALU_Control = `ALU_SUB;
                     PCSrc2 = 1'b0;
                     ShiftSrc = 1'b0;
+                    WriteBackSrc2 = 1'b0;
                     end
                 `funct_and:
                     begin
                     ALU_Control = `ALU_AND;
                     PCSrc2 = 1'b0;
                     ShiftSrc = 1'b0;
+                    WriteBackSrc2 = 1'b0;
                     end
                 `funct_or:
                     begin
                     ALU_Control = `ALU_OR;
                     PCSrc2 = 1'b0;
                     ShiftSrc = 1'b0;
+                    WriteBackSrc2 = 1'b0;
                     end
                 `funct_nor:
                     begin
                     ALU_Control = `ALU_NOR;
                     PCSrc2 = 1'b0;
                     ShiftSrc = 1'b0;
+                    WriteBackSrc2 = 1'b0;
                     end
                 `funct_xor:
                     begin
                     ALU_Control = `ALU_XOR;
                     PCSrc2 = 1'b0;
                     ShiftSrc = 1'b0;
+                    WriteBackSrc2 = 1'b0;
                     end
                 `funct_slt:
                     begin
                     ALU_Control = `ALU_SLT;
                     PCSrc2 = 1'b0;
                     ShiftSrc = 1'b0;
+                    WriteBackSrc2 = 1'b0;
                     end
                 `funct_sltu:
                     begin
                     ALU_Control = `ALU_SLTU;
                     PCSrc2 = 1'b0;
                     ShiftSrc = 1'b0;
+                    WriteBackSrc2 = 1'b0;
                     end
                 `funct_jalr:
                     begin
                     ALU_Control = `ALU_NOP;
                     PCSrc2 = 1'b1;
                     ShiftSrc = 1'b0;
+                    WriteBackSrc2 = 1'b1; //jalr为1
                     end
                 `funct_jr:
                     begin
-                    ALU_Control = `ALU_NOP;
+                    ALU_Control = `ALU_NOP; //因为该指令regwrite到0寄存器，所以不用特殊操作
                     PCSrc2 = 1'b1;
                     ShiftSrc = 1'b0;
+                    WriteBackSrc2 = 1'b0;
                     end
                 `funct_sll:
                     begin
                     ALU_Control = `ALU_SLL; //左移
                     PCSrc2 = 1'b0;
                     ShiftSrc = 1'b1;
+                    WriteBackSrc2 = 1'b0;
                     end
                 `funct_sllv:
                     begin
                     ALU_Control = `ALU_SLL; //左移
                     PCSrc2 = 1'b0;
                     ShiftSrc = 1'b0;
+                    WriteBackSrc2 = 1'b0;
                     end
                 `funct_sra:
                     begin
                     ALU_Control = `ALU_SRA; //算数右移
                     PCSrc2 = 1'b0;
                     ShiftSrc = 1'b1; //s
+                    WriteBackSrc2 = 1'b0;
                     end
                 `funct_srav:
                     begin
                     ALU_Control = `ALU_SRA; //算数右移
                     PCSrc2 = 1'b0;
                     ShiftSrc = 1'b0; //GPR
+                    WriteBackSrc2 = 1'b0;
                     end
                 `funct_srl:
                     begin
                     ALU_Control = `ALU_SRL; //逻辑右移
                     PCSrc2 = 1'b0;
                     ShiftSrc = 1'b1; //s
+                    WriteBackSrc2 = 1'b0;
                     end
             endcase
             end
@@ -132,46 +150,55 @@ module ALUControl(ALUOp,Funct,ALU_Control,PCSrc2,ShiftSrc);
             begin
             ALU_Control = `ALU_ADD;
             PCSrc2 = 1'b0;
+            WriteBackSrc2 = 1'b0;
             end
         `ALUOP_ANDI: //andi
             begin
             ALU_Control = `ALU_AND;
             PCSrc2 = 1'b0;
+            WriteBackSrc2 = 1'b0;
             end
         `ALUOP_ORI: //ori
             begin
             ALU_Control = `ALU_OR;
             PCSrc2 = 1'b0;
+            WriteBackSrc2 = 1'b0;
             end
         `ALUOP_XORI: //xori
             begin
             ALU_Control = `ALU_XOR;
             PCSrc2 = 1'b0;
+            WriteBackSrc2 = 1'b0;
             end
         `ALUOP_SLTI:
             begin
             ALU_Control = `ALU_SLT;
             PCSrc2 = 1'b0;
+            WriteBackSrc2 = 1'b0;
             end
         `ALUOP_SLTIU:
             begin
             ALU_Control = `ALU_SLTU;
             PCSrc2 = 1'b0;
+            WriteBackSrc2 = 1'b0;
             end
         `ALUOP_LUI:
             begin
             ALU_Control = `ALU_LUI;
             PCSrc2 = 1'b0;
+            WriteBackSrc2 = 1'b0;
             end
         `ALUOP_BEQ:
             begin
             ALU_Control = `ALU_SUB;
             PCSrc2 = 1'b0;
+            WriteBackSrc2 = 1'b0;
             end
         `ALUOP_BNE:
             begin
             ALU_Control = `ALU_SUB;
             PCSrc2 = 1'b0;
+            WriteBackSrc2 = 1'b0;
             end
         
     endcase

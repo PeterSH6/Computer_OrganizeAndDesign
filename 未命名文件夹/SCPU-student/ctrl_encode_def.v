@@ -70,7 +70,7 @@
 `define funct_subu  6'b100011 //
 `define funct_xor   6'b100110//
 `define funct_jalr  6'b001001//
-`define funct_jr    6'b001001//
+`define funct_jr    6'b001000//
 
 //ALUOp
 `define ALUOP_Rtype 4'b0010

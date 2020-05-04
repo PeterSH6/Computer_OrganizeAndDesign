@@ -6,7 +6,8 @@ module IM(
     //integer i,count,fp,regist;   
     initial 
     begin
-        $readmemh("mipstestloopjal_sim.txt", Instruction_Memory);
+        //$readmemh("mipstestloopjal_sim.txt", Instruction_Memory);
+        $readmemh("mipstest_extloop.txt", Instruction_Memory);
     end
     always@(*)
     begin

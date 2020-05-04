@@ -41,7 +41,7 @@ module MIPS(clk,rst);
     wire [3:0] ALUOp;
     wire BranchSrc;
     wire Not;
-    wire WriteBackSrc;
+    wire WriteBackSrc1;
     wire PCSrc1;
     wire ShiftSrc1;
     wire [1:0] mux_bhw;
@@ -51,7 +51,7 @@ module MIPS(clk,rst);
     Control my_ctrl(.OP(Instruction[31:26]),.Inst(Instruction[10:6]),.RegDst(RegDst),.Jump(Jump),.Branch(Branch),
     .MemRead(MemRead),.MemtoReg(MemtoReg),.ALUOp(ALUOp),.MemWrite(MemWrite),
     .ALUSrc(ALUSrc),.RegWrite(RegWrite),.BranchSrc(BranchSrc),.Not(Not),.EXTOP_b(EXTOp_b),.EXTOP_h(EXTOp_h),.EXTOP1(EXTOp1),
-    .WriteBackSrc(WriteBackSrc),.PCSrc1(PCSrc1),.ShiftSrc1(ShiftSrc1),.mux_bhw(mux_bhw));
+    .WriteBackSrc(WriteBackSrc1),.PCSrc1(PCSrc1),.ShiftSrc1(ShiftSrc1),.mux_bhw(mux_bhw));
     
     //MUX
     wire [4:0]writeRegister;
@@ -62,6 +62,9 @@ module MIPS(clk,rst);
     wire [31:0]PCPLUS4;
     wire [31:0]WriteData;
     wire [31:0] WriteDataFinal;
+    wire WriteBackSrc2;
+    wire WriteBackSrc;
+    assign WriteBackSrc = WriteBackSrc1 | WriteBackSrc2;
     mux2 WriteBackMux(.d0(WriteData),.d1(PCPLUS4),.s(WriteBackSrc),.y(WriteDataFinal));
 
     //RF module
@@ -86,7 +89,7 @@ module MIPS(clk,rst);
     wire [3:0] ALU_Control;
     wire PCSrc2;
     wire ShiftSrc2;
-    ALUControl my_alucontrol(.ALUOp(ALUOp),.Funct(Instruction[5:0]),.ALU_Control(ALU_Control),.PCSrc2(PCSrc2),.ShiftSrc(ShiftSrc2));
+    ALUControl my_alucontrol(.ALUOp(ALUOp),.Funct(Instruction[5:0]),.ALU_Control(ALU_Control),.PCSrc2(PCSrc2),.ShiftSrc(ShiftSrc2),.WriteBackSrc2(WriteBackSrc2));
 
     assign PCSrc = PCSrc1 & PCSrc2;
 

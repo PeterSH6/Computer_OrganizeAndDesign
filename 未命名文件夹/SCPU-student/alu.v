@@ -22,9 +22,9 @@ module alu(A,B,ALUOp,C,Zero);
           `ALU_SGT:  C = (A > B) ? 32'd1 : 32'd0;    // SGT/SGTI
           `ALU_SLTU: C = ({1'b0, A} < {1'b0, B}) ? 32'd1 : 32'd0; //SLTU/SLTUI
           `ALU_LUI:  C = {B[15:0],16'b0};            //LUI
-          `ALU_SLL:  C = B << A;
-          `ALU_SRA:  C = B >>> A;
-          `ALU_SRL:  C = B >> A;
+          `ALU_SLL:  C = B << A[4:0];
+          `ALU_SRA:  C = B >>> A[4:0];
+          `ALU_SRL:  C = B >> A[4:0];
           default:   C = A;                          // Undefined
       endcase
    end // end always

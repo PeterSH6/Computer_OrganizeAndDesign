@@ -28,8 +28,8 @@
 `define OP_lh    6'b100001//
 `define OP_lhu   6'b100101//
 `define OP_sw    6'b101011//
-`define OP_sb    6'b101000
-`define OP_sh    6'b101001
+`define OP_sb    6'b101000//
+`define OP_sh    6'b101001//
 `define OP_j     6'b000010//
 `define OP_jal   6'b000011//
 `define OP_jalr  6'b000000//special func 001001

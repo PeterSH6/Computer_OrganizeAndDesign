@@ -45,11 +45,13 @@ module MIPS(clk,rst);
     wire PCSrc1;
     wire ShiftSrc1;
     wire [1:0] mux_bhw;
+    wire [1:0] MemRBits;
+    wire [1:0] MemWrBits;
     wire EXTOp_b;
     wire EXTOp_h;
     wire EXTOp1;//sign extend or zero extend
     Control my_ctrl(.OP(Instruction[31:26]),.Inst(Instruction[10:6]),.RegDst(RegDst),.Jump(Jump),.Branch(Branch),
-    .MemRead(MemRead),.MemtoReg(MemtoReg),.ALUOp(ALUOp),.MemWrite(MemWrite),
+    .MemRead(MemRead),.MemtoReg(MemtoReg),.ALUOp(ALUOp),.MemWrite(MemWrite),.MemWrBits(MemWrBits),.MemRBits(MemRBits),
     .ALUSrc(ALUSrc),.RegWrite(RegWrite),.BranchSrc(BranchSrc),.Not(Not),.EXTOP_b(EXTOp_b),.EXTOP_h(EXTOp_h),.EXTOP1(EXTOp1),
     .WriteBackSrc(WriteBackSrc1),.PCSrc1(PCSrc1),.ShiftSrc1(ShiftSrc1),.mux_bhw(mux_bhw));
     
@@ -118,7 +120,7 @@ module MIPS(clk,rst);
     
     //DM
     wire [31:0] MemData;//read data
-    DM my_DM(.clk(clk),.MemR(MemRead),.MemWr(MemWrite),.addr(ALUResult),.data(ReadData2),.ReadData(MemData));
+    DM my_DM(.clk(clk),.MemR(MemRead),.MemWr(MemWrite),.MemWrBits(MemWrBits),.MemRBits(MemRBits),.addr(ALUResult),.data(ReadData2),.ReadData(MemData));
     
     //EXT8-32 for lb,lbu
     wire [31:0] MemData_8;

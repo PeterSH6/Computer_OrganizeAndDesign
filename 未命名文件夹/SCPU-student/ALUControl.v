@@ -144,6 +144,13 @@ module ALUControl(ALUOp,Funct,ALU_Control,PCSrc2,ShiftSrc,WriteBackSrc2);
                     ShiftSrc = 1'b1; //s
                     WriteBackSrc2 = 1'b0;
                     end
+                `funct_srlv:
+                    begin
+                    ALU_Control = `ALU_SRL; //逻辑右移
+                    PCSrc2 = 1'b0;
+                    ShiftSrc = 1'b0; //GPR
+                    WriteBackSrc2 = 1'b0;
+                    end
             endcase
             end
         `ALUOP_ADDI: //adi

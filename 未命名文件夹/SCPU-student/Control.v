@@ -1,9 +1,11 @@
 `include "ctrl_encode_def.v"
-module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc,RegWrite,EXTOP1,EXTOP_b,EXTOP_h,mux_bhw,BranchSrc,Not,WriteBackSrc,PCSrc1,ShiftSrc1);
+module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc,RegWrite,EXTOP1,EXTOP_b,EXTOP_h,mux_bhw,BranchSrc,Not,WriteBackSrc,PCSrc1,ShiftSrc1,MemWrBits,MemRBits);
     input [5:0] OP;
     input [4:0] Inst;
     output reg Jump,Branch,MemRead,MemtoReg,MemWrite,RegWrite,EXTOP1,EXTOP_b,EXTOP_h,BranchSrc,Not,WriteBackSrc,PCSrc1,ShiftSrc1;
     output reg [3:0] ALUOp;
+    output reg [1:0] MemRBits;
+    output reg [1:0] MemWrBits;
     output reg [1:0] ALUSrc;
     output reg [1:0] RegDst;
     output reg [1:0] mux_bhw;
@@ -30,6 +32,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b1;
                 ShiftSrc1 = 1'b1;
+                MemRBits = 2'bxx;
+                MemWrBits = 2'bxx;
                 end
             `OP_addi:
                 begin
@@ -51,6 +55,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'bxx;
+                MemWrBits = 2'bxx;
                 end
             `OP_addiu:
                 begin
@@ -72,6 +78,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'bxx;
+                MemWrBits = 2'bxx;
                 end
             `OP_andi:
                 begin
@@ -93,6 +101,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'bxx;
+                MemWrBits = 2'bxx;
                 end
             `OP_ori:
                 begin
@@ -114,6 +124,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'bxx;
+                MemWrBits = 2'bxx;
                 end
             `OP_xori:
                 begin
@@ -135,6 +147,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'bxx;
+                MemWrBits = 2'bxx;
                 end
             `OP_lui:
                 begin
@@ -156,6 +170,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'bxx;
+                MemWrBits = 2'bxx;
                 end
             `OP_slti:
                 begin
@@ -177,6 +193,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'bxx;
+                MemWrBits = 2'bxx;
                 end
             `OP_sltiu:
                 begin
@@ -198,6 +216,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'bxx;
+                MemWrBits = 2'bxx;
                 end
             `OP_lw:
                 begin
@@ -219,6 +239,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'b00;
+                MemWrBits = 2'bxx;
                 end
             `OP_lb:
                 begin
@@ -240,6 +262,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'b10;
+                MemWrBits = 2'bxx;
                 end
             `OP_lbu:
                 begin
@@ -261,6 +285,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'b10;
+                MemWrBits = 2'bxx;
                 end
             `OP_lh:
                 begin
@@ -282,6 +308,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'b01;
+                MemWrBits = 2'bxx;
                 end
             `OP_lhu:
                 begin
@@ -303,6 +331,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'b01;
+                MemWrBits = 2'bxx;
                 end
             `OP_sw:
                 begin
@@ -324,6 +354,54 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'bxx;
+                MemWrBits = 2'b00;
+                end
+            `OP_sh:
+                begin
+                RegDst = 2'b00;
+                MemtoReg = 1'b0;
+                RegWrite = 1'b0;
+                MemRead = 1'b0;
+                MemWrite = 1'b1;
+                Branch = 1'b0;
+                Jump = 1'b0;
+                EXTOP1 = 1'b1;
+                EXTOP_b = 1'bx;
+                EXTOP_h = 1'bx;
+                BranchSrc = 1'bx;
+                Not = 1'bx;
+                ALUOp = 2'b00;
+                ALUSrc = 2'b01;
+                mux_bhw = 2'b00;
+                WriteBackSrc = 1'b0;
+                PCSrc1 = 1'b0;
+                ShiftSrc1 = 1'b0;
+                MemRBits = 2'bxx;
+                MemWrBits = 2'b01;
+                end
+            `OP_sb:
+                begin
+                RegDst = 2'b00;
+                MemtoReg = 1'b0;
+                RegWrite = 1'b0;
+                MemRead = 1'b0;
+                MemWrite = 1'b1;
+                Branch = 1'b0;
+                Jump = 1'b0;
+                EXTOP1 = 1'b1;
+                EXTOP_b = 1'bx;
+                EXTOP_h = 1'bx;
+                BranchSrc = 1'bx;
+                Not = 1'bx;
+                ALUOp = 2'b00;
+                ALUSrc = 2'b01;
+                mux_bhw = 2'b00;
+                WriteBackSrc = 1'b0;
+                PCSrc1 = 1'b0;
+                ShiftSrc1 = 1'b0;
+                MemRBits = 2'bxx;
+                MemWrBits = 2'b10;
                 end
             `OP_beq:
                 begin
@@ -345,6 +423,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'bxx;
+                MemWrBits = 2'bxx;
                 end
             `OP_bne:
                 begin
@@ -366,6 +446,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'bxx;
+                MemWrBits = 2'bxx;
                 end
             `OP_bgez_bltz: 
                 begin
@@ -389,6 +471,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                     WriteBackSrc = 1'b0;
                     PCSrc1 = 1'b0;
                     ShiftSrc1 = 1'b0;
+                    MemRBits = 2'bxx;
+                    MemWrBits = 2'bxx;
                     end
                 else if(Inst == 5'b00000) //小于时转移
                     begin
@@ -410,6 +494,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                     WriteBackSrc = 1'b0;
                     PCSrc1 = 1'b0;
                     ShiftSrc1 = 1'b0;
+                    MemRBits = 2'bxx;
+                    MemWrBits = 2'bxx;
                     end
                 end   
             `OP_bgtz: //大于0时转移 000111
@@ -432,6 +518,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'bxx;
+                MemWrBits = 2'bxx;
                 end
             `OP_blez: //小于等于0时转移 000110
                 begin
@@ -453,6 +541,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'bxx;
+                MemWrBits = 2'bxx;
                 end
             `OP_j:
                 begin
@@ -474,6 +564,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b0;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'bxx;
+                MemWrBits = 2'bxx;
                 end
             `OP_jal:
                 begin
@@ -495,6 +587,8 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                 WriteBackSrc = 1'b1;
                 PCSrc1 = 1'b0;
                 ShiftSrc1 = 1'b0;
+                MemRBits = 2'bxx;
+                MemWrBits = 2'bxx;
                 end 
         endcase          
     end

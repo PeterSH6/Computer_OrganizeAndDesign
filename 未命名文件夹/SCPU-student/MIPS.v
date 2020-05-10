@@ -50,7 +50,7 @@ module MIPS(clk,rst);
     wire EXTOp_b;
     wire EXTOp_h;
     wire EXTOp1;//sign extend or zero extend
-    Control my_ctrl(.OP(Instruction[31:26]),.Inst(Instruction[10:6]),.RegDst(RegDst),.Jump(Jump),.Branch(Branch),
+    Control my_ctrl(.OP(Instruction[31:26]),.Inst(Instruction[20:16]),.RegDst(RegDst),.Jump(Jump),.Branch(Branch),
     .MemRead(MemRead),.MemtoReg(MemtoReg),.ALUOp(ALUOp),.MemWrite(MemWrite),.MemWrBits(MemWrBits),.MemRBits(MemRBits),
     .ALUSrc(ALUSrc),.RegWrite(RegWrite),.BranchSrc(BranchSrc),.Not(Not),.EXTOP_b(EXTOp_b),.EXTOP_h(EXTOp_h),.EXTOP1(EXTOp1),
     .WriteBackSrc(WriteBackSrc1),.PCSrc1(PCSrc1),.ShiftSrc1(ShiftSrc1),.mux_bhw(mux_bhw));

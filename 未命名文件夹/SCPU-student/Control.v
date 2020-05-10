@@ -464,7 +464,7 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                     EXTOP_b = 1'bx;
                     EXTOP_h = 1'bx;
                     BranchSrc = 1'b1;
-                    Not = 1'b1;
+                    Not = 1'b1; //取反
                     ALUOp = `ALUOP_SLTI; //set on greater than 
                     ALUSrc = 2'b10;
                     mux_bhw = 2'b00;
@@ -489,7 +489,7 @@ module Control(OP,Inst,RegDst,Jump,Branch,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc
                     BranchSrc = 1'b1;
                     Not = 1'b0;
                     ALUOp = `ALUOP_SLTI; //set on greater than 
-                    ALUSrc = 2'b10;
+                    ALUSrc = 2'b10; //choose 0
                     mux_bhw = 2'b00;
                     WriteBackSrc = 1'b0;
                     PCSrc1 = 1'b0;

@@ -183,6 +183,12 @@ module ALUControl(ALUOp,Funct,ALU_Control,PCSrc2,ShiftSrc,WriteBackSrc2);
             PCSrc2 = 1'b0;
             WriteBackSrc2 = 1'b0;
             end
+        `ALUOP_SGT:
+            begin
+            ALU_Control = `ALU_SGT;
+            PCSrc2 = 1'b0;
+            WriteBackSrc2 = 1'b0;
+            end
         `ALUOP_SLTIU:
             begin
             ALU_Control = `ALU_SLTU;

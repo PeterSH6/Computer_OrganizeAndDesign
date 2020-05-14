@@ -3,22 +3,41 @@
 `define NPC_BRANCH  2'b01
 `define NPC_JUMP    2'b10
 
+//MemR
+`define MemR_lw     3'b000;
+`define MemR_lh     3'b001;
+`define MemR_lhu    3'b010;
+`define MemR_lb     3'b011;
+`define MemR_lbu    3'b100;
+
+//MemWrBits
+`define MemWr_sw    2'b00;
+`define MemWr_sh    2'b01;
+`define MemWr_sb    2'b10;
 
 // ALU control signal
-`define ALU_NOP   4'b0000 
-`define ALU_OR    4'b0001
-`define ALU_ADD   4'b0010
-`define ALU_AND   4'b0011
-`define ALU_SLL   4'b0100
-`define ALU_SRA   4'b0101 
-`define ALU_SUB   4'b0110 
-`define ALU_SLT   4'b0111
-`define ALU_SRL   4'b1000
-`define ALU_SGT   4'b1001
-`define ALU_SLTU  4'b1100 
-`define ALU_NOR   4'b1101
-`define ALU_XOR   4'b1110
-`define ALU_LUI   4'b1111
+`define ALU_NOP   5'b00000 
+`define ALU_OR    5'b00001
+`define ALU_ADD   5'b00010
+`define ALU_AND   5'b00011
+`define ALU_SLL   5'b00100
+`define ALU_SRA   5'b00101 
+`define ALU_SUB   5'b00110 
+`define ALU_SLT   5'b00111
+`define ALU_SRL   5'b01000
+`define ALU_SGT   5'b01001
+`define ALU_SLTU  5'b01100 
+`define ALU_NOR   5'b01101
+`define ALU_XOR   5'b01110
+`define ALU_LUI   5'b01111
+`define ALU_ORI   5'b10000
+`define ALU_XORI  5'b10001
+`define ALU_ANDI  5'b10010
+`define ALU_BGTZ  5'b10011
+`define ALU_BGEZ  5'b10100
+`define ALU_BLEZ  5'b10101
+`define ALU_BLTZ  5'b10110
+`define ALU_BNE   5'b10111
 
 //Control signal
 `define OP_Rtype 6'b000000//

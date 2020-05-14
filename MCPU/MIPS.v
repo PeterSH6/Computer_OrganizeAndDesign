@@ -13,13 +13,6 @@
 module MIPS(clk,rst);
     input clk;
     input rst;
-
-    //PC_MUX
-    wire [31:0] PC_i; //从NPC出来的数据
-    wire [31:0] ALUResult; //ALU中算出的地址，用于处理jalr和jr。ALU实际做+0操作
-    wire PCSrc; 
-    wire [31:0] finalPC_i;//最终写入PC的值
-    mux2 PC_MUX(.d0(PC_i),.d1(ALUResult),.s(PCSrc),.y(finalPC_i));
     
     //PC module OK
     wire [31:0] PC_i; 
@@ -77,7 +70,7 @@ module MIPS(clk,rst);
     mux4 MUX_ALUSrcA(.d0(RegB_o),.d1(32'd4),.d2(Instr_32),.d3(Instr_32 << 2),.s(Sig_ALUSrcB),.y(ALUSrcB));
 
     //ALU OK
-    wire [3:0] ALUOp;
+    wire [4:0] ALUOp;
     wire [31:0] ALUResult;
     wire zero;
     alu ALU(.A(ALUSrcA),.B(ALUSrcB),.ALUOp(ALUOp),.C(ALUResult),.Zero(zero));
@@ -104,14 +97,22 @@ module MIPS(clk,rst);
 
     //MUX PCSrc
     wire [1:0] PCSrc
-    mux4 MUX_PCSrc(.d0(ALUOut_o),.d1(ALUResult)
-    ,.d2({PC_o[31:28],Instr_o[26:0]<<2,2'b00})
+    mux4 MUX_PCSrc(.d1(ALUOut_o),.d0(ALUResult)
+    ,.d2({PC_o[31:28],.d3(RegA_o),Instr_o[26:0]<<2,2'b00})
     ,.s(PCSrc),.y(PC_i));
 
     //Control
-    Control
+    wire PCWrite;
+    wire PCWriteCond;
+    Control my_Control(.clk(clk),.rst(rst),.OP(Instr_o[31:26])
+    ,.Funct(Instr_o[5:0]),.Rt(Instr_o[20:16]),.PCWrite(PCWrite),
+    .PCWriteCond(PCWriteCond),.PCSrc(PCSrc),.IRWrite(IRWrite),
+    .RegDst(RegDst),.MemRead(MemR),.MemtoReg(MemtoReg),.ALUOp(ALUOp),
+    .MemWrite(MemWr),.ALUSrc_A(Sig_ALUSrcA),.ALUSrc_B(Sig_ALUSrcB),
+    .RegWrite(RegWrite),.EXTOp(EXTOp),.MemWrBits(MemWrBits),.MemRBits(MemRBits));
 
-
+    //PCFinal
+    assign PC_Write_Final = PCWrite | (PCWriteCond & zero);
 
 
 endmodule

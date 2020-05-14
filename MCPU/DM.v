@@ -49,25 +49,25 @@ module DM(
     always@(*)
     begin
     case(MemRBits)
-        3'b000: //lw
+        `MemR_lw: //lw
             begin
             ReadData <= (MemR == 1)? Data_Memory[addr>>2] : 0;
             end
-        3'b001: //lhu
+        `MemR_lhu: //lhu
             begin
             if(~addr[1] & ~addr[0])
                 ReadData <= (MemR == 1)? {16'b0,Data_Memory[addr>>2][15:0]} : 0;
             else if(addr[1] & ~addr[0])
                 ReadData <= (MemR == 1)? {16'b0,Data_Memory[addr>>2][31:16]} :0; 
             end
-        3'b010: //lh
+        `MemR_lh: //lh
             begin
             if(~addr[1] & ~addr[0])
                 ReadData <= (MemR == 1)? {{16{Data_Memory[addr>>2][15]}},Data_Memory[addr>>2][15:0]} : 0;
             else if(addr[1] & ~addr[0])
                 ReadData <= (MemR == 1)? {{16{Data_Memory[addr>>2][31]}},Data_Memory[addr>>2][31:16]} :0; 
             end
-        3'b011: //lbu
+        `MemR_lbu: //lbu
             begin
             if(~addr[1]&~addr[0]) 
                 ReadData <= (MemR == 1)? {24'b0,Data_Memory[addr>>2][7:0]} : 0;    
@@ -78,7 +78,7 @@ module DM(
             else if(addr[1]&addr[0]) 
                 ReadData <= (MemR == 1)? {24'b0,Data_Memory[addr>>2][31:24]} : 0;    
             end
-        3'b100: //lb
+        `MemR_lb: //lb
             begin
             if(~addr[1]&~addr[0]) 
                 ReadData <= (MemR == 1)? {{24{Data_Memory[addr>>2][7]}},Data_Memory[addr>>2][7:0]} : 0;    

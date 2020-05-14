@@ -16,17 +16,6 @@ module Control(clk,rst,OP,Funct,Rt,PCWrite,PCWriteCond,PCSrc,IRWrite,RegDst,MemR
     output reg [1:0] PCSrc;
 
     reg [3:0] state;
-    parameter   Inital =                     4'b0000;
-                Instruction_Fetch =          4'b0001;
-                Instruction_Decode =         4'b0010;
-                Jump_Completion =            4'b0011;
-                Execution =                  4'b0100;
-                Memory_Address_Computation = 4'b0101;
-                Branch_Completion =          4'b0110; 
-                Memory_Access_Load =         4'b0111;
-                Memory_Access_Store =        4'b1000;
-                MemRead_Completion =         4'b1001;
-                Rtype_Completion =           4'b1010;
 
     initial begin
         state <= Inital;

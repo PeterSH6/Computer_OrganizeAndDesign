@@ -15,10 +15,10 @@ module MIPS(clk,rst);
     input rst;
 
     //PC_MUX
-    wire [31:0] i_PC;
-    wire [31:0] ALUResult;
-    wire PCSrc;
-    wire [31:0] finali_PC;
+    wire [31:0] i_PC; //从NPC出来的数据
+    wire [31:0] ALUResult; //ALU中算出的地址，用于处理jalr和jr。ALU实际做+0操作
+    wire PCSrc; 
+    wire [31:0] finali_PC;//最终写入PC的值
     mux2 PC_MUX(.d0(i_PC),.d1(ALUResult),.s(PCSrc),.y(finali_PC));
     
     //PC module
@@ -44,10 +44,10 @@ module MIPS(clk,rst);
     wire WriteBackSrc1;
     wire PCSrc1;
     wire ShiftSrc1;
-    wire [1:0] mux_bhw;
-    wire [1:0] MemRBits;
-    wire [1:0] MemWrBits;
-    wire EXTOp_b;
+    wire [1:0] mux_bhw; //从lw，lh，lb的三个EXT结果中选值
+    wire [1:0] MemRBits;  //控制为lw，lh，lhu，lb，lbu
+    wire [1:0] MemWrBits; //控制sw，sb，sh
+    wire EXTOp_b; //EXT为logic还是arithmetic
     wire EXTOp_h;
     wire EXTOp1;//sign extend or zero extend
     Control my_ctrl(.OP(Instruction[31:26]),.Inst(Instruction[20:16]),.RegDst(RegDst),.Jump(Jump),.Branch(Branch),
@@ -56,17 +56,17 @@ module MIPS(clk,rst);
     .WriteBackSrc(WriteBackSrc1),.PCSrc1(PCSrc1),.ShiftSrc1(ShiftSrc1),.mux_bhw(mux_bhw));
     
     //MUX
-    wire [4:0]writeRegister;
+    wire [4:0]writeRegister;//写回寄存器号数
     wire [4:0] reg_ra = 5'b11111;
     mux4_5 muxRegDst(.d0(Instruction[20:16]),.d1(Instruction[15:11]),.d2(reg_ra),.s(RegDst),.y(writeRegister));//5位 2选1
     
     //WriteBack MUX
-    wire [31:0]PCPLUS4;
+    wire [31:0]PCPLUS4; 
     wire [31:0]WriteData;
     wire [31:0] WriteDataFinal;
-    wire WriteBackSrc2;
+    wire WriteBackSrc2;//jalr = 1; other = 0
     wire WriteBackSrc;
-    assign WriteBackSrc = WriteBackSrc1 | WriteBackSrc2;
+    assign WriteBackSrc = WriteBackSrc1 | WriteBackSrc2; //Src1 : jal = 1 ; other = 0;
     mux2 WriteBackMux(.d0(WriteData),.d1(PCPLUS4),.s(WriteBackSrc),.y(WriteDataFinal));
 
     //RF module
@@ -96,7 +96,7 @@ module MIPS(clk,rst);
     assign PCSrc = PCSrc1 & PCSrc2;
 
     //MUX ALUSrc1
-    wire ShiftSrc;
+    wire ShiftSrc; //用于解决sll,sllv,sra,srav。Src1(Control) : Rtype = 1; other = 0  Src2 : shift = 1; other = 0
     assign ShiftSrc = ShiftSrc1 & ShiftSrc2;
     wire [31:0] ReadDataF1;
     mux2 muxALUSrc1(.d0(ReadData1),.d1({27'b0,Instruction[10:6]}),.s(ShiftSrc),.y(ReadDataF1));
@@ -106,11 +106,11 @@ module MIPS(clk,rst);
     alu my_alu(ReadDataF1,ALUData2,ALU_Control,ALUResult,Zero);
 
     //MUX branchsrc
-    wire branchsrc_o;
+    wire branchsrc_o; //Zero or ALUResult
     mux2_1 my_muxbranchsrc(.d0(Zero),.d1(ALUResult[0]),.s(BranchSrc),.y(branchsrc_o));
 
     //Not
-    wire Not_o ;
+    wire Not_o ; //Not Zero or ALUResult 用于bgtz等
     assign Not_o = (Not) ? (~branchsrc_o) : branchsrc_o;
 
     //NPC

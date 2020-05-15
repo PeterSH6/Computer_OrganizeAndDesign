@@ -2,7 +2,6 @@
 `include "ctrl_encode_def.v"
 `include "EXT.v"
 `include "mux.v"
-`include "NPC.v"
 `include "PC.v"
 `include "RF.v"
 `include "IM.v"
@@ -27,22 +26,23 @@ module MIPS(clk,rst);
     //Instruction Regsiter OK
     wire IRWrite;
     wire [31:0] Instr_o;
-    Regsiter(.clk(clk),.WriteSignal(IRWrite),.in(Instruction),.out(Instr_o));
+    Register InstrReg(.clk(clk),.WriteSignal(IRWrite),.in(Instruction),.out(Instr_o));
 
     //MUX RegSrc OK
     wire [4:0]writeRegister;//写回寄存器号数
     wire [4:0] reg_ra = 5'b11111;//31号寄存器
+    wire [1:0] RegDst;
     mux4_5 muxRegDst(.d0(Instr_o[20:16]),.d1(Instr_o[15:11]),.d2(reg_ra),.s(RegDst),.y(writeRegister));//5位 3选1
 
     //RF module OK
     wire RegWrite;
     wire [31:0]ReadData1;
     wire [31:0]ReadData2;
-    wire WriteDataFinal;
+    wire [31:0]WriteDataFinal;
     RF my_RF(.clk(clk),.rst(rst),
     .RFWr(RegWrite),
-    .A1(Instruction[25:21]),
-    .A2(Instruction[20:16]),
+    .A1(Instr_o[25:21]),
+    .A2(Instr_o[20:16]),
     .A3(writeRegister),
     .WD(WriteDataFinal),.RD1(ReadData1),.RD2(ReadData2));//last 2 param
     
@@ -52,22 +52,21 @@ module MIPS(clk,rst);
     
     //RegisterB OK
     wire [31:0] RegB_o;
-    Register  RegA(.clk(clk),.WriteSignal(1'b1),.in(ReadData2),.out(RegB_o));
+    Register  RegB(.clk(clk),.WriteSignal(1'b1),.in(ReadData2),.out(RegB_o));
 
     //MUX ALUSrcA OK
-    wire [1:0] Sig_ALUSrcA
+    wire [1:0] Sig_ALUSrcA;
     wire [31:0] ALUSrcA;
-    mux4 MUX_ALUSrcA(.d0(RegA_o),.d1(PC_o),.d2(Instr_o[10:6]),.s(Sig_ALUSrcA),.y(ALUSrcA));
+    mux4 MUX_ALUSrcA(.d0(RegA_o),.d1(PC_o),.d2({27'b0,Instr_o[10:6]}),.s(Sig_ALUSrcA),.y(ALUSrcA));
 
     //EXT16 Instr[15:0] -> 31:0 SignEXT OK
-    wire EXTOp;
     wire [31:0] Instr_32;
-    EXT16 my_EXT(.Imm16(Instr_o[15:0]),.EXTOp(EXTOp),.Imm32(Instr_32));
+    EXT16 my_EXT(.Imm16(Instr_o[15:0]),.EXTOp(1'b1),.Imm32(Instr_32));
 
     //MUX ALUSrcB OK
-    wire [1:0] Sig_ALUSrcB
+    wire [1:0] Sig_ALUSrcB;
     wire [31:0] ALUSrcB;
-    mux4 MUX_ALUSrcA(.d0(RegB_o),.d1(32'd4),.d2(Instr_32),.d3(Instr_32 << 2),.s(Sig_ALUSrcB),.y(ALUSrcB));
+    mux4 MUX_ALUSrcB(.d0(RegB_o),.d1(32'd4),.d2(Instr_32),.d3(Instr_32 << 2),.s(Sig_ALUSrcB),.y(ALUSrcB));
 
     //ALU OK
     wire [4:0] ALUOp;
@@ -76,8 +75,8 @@ module MIPS(clk,rst);
     alu ALU(.A(ALUSrcA),.B(ALUSrcB),.ALUOp(ALUOp),.C(ALUResult),.Zero(zero));
 
     //ALUOut OK
-    wire ALUOut_o;
-    Regsiter ALUOut(.clk(clk),.WriteSignal(1'b1),.in(ALUResult),.out(ALUOut_o));
+    wire [31:0] ALUOut_o;
+    Register ALUOut(.clk(clk),.WriteSignal(1'b1),.in(ALUResult),.out(ALUOut_o));
 
     //DM OK
     wire MemR;
@@ -85,21 +84,21 @@ module MIPS(clk,rst);
     wire [1:0] MemWrBits;
     wire [2:0] MemRBits;
     wire [31:0]ReadData;
-    DM DataMemory(.clk(clk),.MemR(MemR),.MemWr(MemWr).MemWrBits(MemWrBits),.MemRBits(MemRBits),.addr(ALUOut_o),.data(ALUSrcB),.ReadData(ReadData));
+    DM DataMemory(.clk(clk),.MemR(MemR),.MemWr(MemWr),.MemWrBits(MemWrBits),.MemRBits(MemRBits),.addr(ALUOut_o),.data(ALUSrcB),.ReadData(ReadData));
 
     //MemData Register OK
-    wire MemData_o;
+    wire [31:0] MemData_o;
     Register MemDataReg(.clk(clk),.WriteSignal(1'b1),.in(ReadData),.out(MemData_o));
 
     //WriteBack MUX OK
-    wire MemtoReg;
-    mux4 MUX_WriteBack(.d0(MemData_o),.d1(ALUOut_o),d2(PC_o),.s(MemtoReg),.y(WriteDataFinal));
+    wire [1:0] MemtoReg;
+    mux4 MUX_WriteBack(.d0(MemData_o),.d1(ALUOut_o),.d2(PC_o),.s(MemtoReg),.y(WriteDataFinal));
 
     //MUX PCSrc
-    wire [1:0] PCSrc
+    wire [1:0] PCSrc;
     mux4 MUX_PCSrc(.d1(ALUOut_o),.d0(ALUResult)
-    ,.d2({PC_o[31:28],.d3(RegA_o),Instr_o[26:0]<<2,2'b00})
-    ,.s(PCSrc),.y(PC_i));
+    ,.d2({PC_o[31:28],Instr_o[25:0]<<2,2'b00})
+    ,.d3(RegA_o),.s(PCSrc),.y(PC_i));
 
     //Control
     wire PCWrite;
@@ -109,7 +108,7 @@ module MIPS(clk,rst);
     .PCWriteCond(PCWriteCond),.PCSrc(PCSrc),.IRWrite(IRWrite),
     .RegDst(RegDst),.MemRead(MemR),.MemtoReg(MemtoReg),.ALUOp(ALUOp),
     .MemWrite(MemWr),.ALUSrc_A(Sig_ALUSrcA),.ALUSrc_B(Sig_ALUSrcB),
-    .RegWrite(RegWrite),.EXTOp(EXTOp),.MemWrBits(MemWrBits),.MemRBits(MemRBits));
+    .RegWrite(RegWrite),.MemWrBits(MemWrBits),.MemRBits(MemRBits));
 
     //PCFinal
     assign PC_Write_Final = PCWrite | (PCWriteCond & zero);

@@ -3,29 +3,29 @@
 `define NPC_BRANCH  2'b01
 `define NPC_JUMP    2'b10
 //state
-`define Inital =                     4'b0000;
-`define Instruction_Fetch =          4'b0001;
-`define Instruction_Decode =         4'b0010;
-`define Jump_Completion =            4'b0011;
-`define Execution =                  4'b0100;
-`define Memory_Address_Computation = 4'b0101;
-`define Branch_Completion =          4'b0110; 
-`define Memory_Access_Load =         4'b0111;
-`define Memory_Access_Store =        4'b1000;
-`define MemRead_Completion =         4'b1001;
-`define Rtype_Completion =           4'b1010;
+`define Initial                   4'b0000
+`define Instruction_Fetch          4'b0001
+`define Instruction_Decode         4'b0010
+`define Jump_Completion            4'b0011
+`define Execution                4'b0100
+`define Memory_Address_Computation 4'b0101
+`define Branch_Completion        4'b0110 
+`define Memory_Access_Load         4'b0111
+`define Memory_Access_Store        4'b1000
+`define MemRead_Completion         4'b1001
+`define Rtype_Completion         4'b1010
 
 //MemR
-`define MemR_lw     3'b000;
-`define MemR_lh     3'b001;
-`define MemR_lhu    3'b010;
-`define MemR_lb     3'b011;
-`define MemR_lbu    3'b100;
+`define MemR_lw     3'b000
+`define MemR_lh     3'b001
+`define MemR_lhu    3'b010
+`define MemR_lb     3'b011
+`define MemR_lbu    3'b100
 
 //MemWrBits
-`define MemWr_sw    2'b00;
-`define MemWr_sh    2'b01;
-`define MemWr_sb    2'b10;
+`define MemWr_sw    2'b00
+`define MemWr_sh    2'b01
+`define MemWr_sb    2'b10
 
 // ALU control signal
 `define ALU_NOP   5'b00000 

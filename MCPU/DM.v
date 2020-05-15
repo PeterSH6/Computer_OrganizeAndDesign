@@ -1,3 +1,4 @@
+`include "ctrl_encode_def.v"
 module DM(
     input clk,
     input MemR,
@@ -16,7 +17,7 @@ module DM(
 			Data_Memory[i] <= 0;
 		end
     
-    always@(posedge clk)
+    always@(negedge clk)
     begin
         if(MemWr == 1)
             begin
@@ -49,7 +50,7 @@ module DM(
     always@(*)
     begin
     case(MemRBits)
-        `MemR_lw: //lw
+        `MemR_lw:
             begin
             ReadData <= (MemR == 1)? Data_Memory[addr>>2] : 0;
             end

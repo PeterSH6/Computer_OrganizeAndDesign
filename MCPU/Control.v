@@ -1,11 +1,11 @@
 `include "ctrl_encode_def.v"
-module Control(clk,rst,OP,Funct,Rt,PCWrite,PCWriteCond,PCSrc,IRWrite,RegDst,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc_A,ALUSrc_B,RegWrite,EXTOP,MemWrBits,MemRBits);
+module Control(clk,rst,OP,Funct,Rt,PCWrite,PCWriteCond,PCSrc,IRWrite,RegDst,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc_A,ALUSrc_B,RegWrite,MemWrBits,MemRBits);
     input clk;
     input rst;
     input [5:0] OP;
-    input [5:0] Rt; //Instr[20:16]
+    input [4:0] Rt; //Instr[20:16]
     input [5:0] Funct;
-    output reg PCWrite,PCWriteCond,IRWrite,MemRead,MemWrite,RegWrite,EXTOP;
+    output reg PCWrite,PCWriteCond,IRWrite,MemRead,MemWrite,RegWrite;
     output reg [4:0] ALUOp;
     output reg [2:0] MemRBits;
     output reg [1:0] MemWrBits;
@@ -17,9 +17,10 @@ module Control(clk,rst,OP,Funct,Rt,PCWrite,PCWriteCond,PCSrc,IRWrite,RegDst,MemR
 
     reg [3:0] state;
 
-    initial begin
-        state <= Inital;
-        {PCWrite,PCWriteCond,IRWrite,MemRead,MemWrite,RegWrite,EXTOP} <= 7'b0;
+    initial 
+    begin
+        state <= 4'b0000;
+        {PCWrite,PCWriteCond,IRWrite,MemRead,MemWrite,RegWrite} <= 6'b0;
         ALUOp <= 4'b0;
         MemRBits <= 3'b0;
         MemWrBits <= 2'b0;
@@ -33,7 +34,7 @@ module Control(clk,rst,OP,Funct,Rt,PCWrite,PCWriteCond,PCSrc,IRWrite,RegDst,MemR
     always@(posedge clk)
     begin
         case(state)
-            `Inital:
+            `Initial:
             begin
                 state <= `Instruction_Fetch;
             end
@@ -97,7 +98,7 @@ module Control(clk,rst,OP,Funct,Rt,PCWrite,PCWriteCond,PCSrc,IRWrite,RegDst,MemR
                     end
                     default:
                     begin
-                        state <= `Inital;
+                        state <= `Initial;
                     end
                 endcase 
             end
@@ -122,7 +123,7 @@ module Control(clk,rst,OP,Funct,Rt,PCWrite,PCWriteCond,PCSrc,IRWrite,RegDst,MemR
                     begin
                         state <= `Memory_Access_Store;
                     end
-                    defalut:
+                    default:
                     begin
                         state <= `Initial;
                     end
@@ -138,26 +139,26 @@ module Control(clk,rst,OP,Funct,Rt,PCWrite,PCWriteCond,PCSrc,IRWrite,RegDst,MemR
 				IRWrite <= 1'b0;
                 state <= `MemRead_Completion;
                 case(OP)
-                `OP_lw:
-                begin
-                    MemRBits <= `MemR_lw;
-                end
-                `OP_lh:
-                begin
-                    MemRBits <= `MemR_lh;
-                end
-                `OP_lhu:
-                begin
-                    MemRBits <= `MemR_lhu;
-                end
-                `OP_lb:
-                begin
-                    MemRBits <= `MemR_lb;
-                end
-                `OP_lbu:
-                begin
-                    MemRBits <= `MemR_lbu;
-                end
+                    `OP_lw:
+                    begin
+                        MemRBits <= `MemR_lw;
+                    end
+                    `OP_lh:
+                    begin
+                        MemRBits <= `MemR_lh;
+                    end
+                    `OP_lhu:
+                    begin
+                        MemRBits <= `MemR_lhu;
+                    end
+                    `OP_lb:
+                    begin
+                        MemRBits <= `MemR_lb;
+                    end
+                    `OP_lbu:
+                    begin
+                        MemRBits <= `MemR_lbu;
+                    end
                 endcase
             end
             `Memory_Access_Store:
@@ -297,6 +298,18 @@ module Control(clk,rst,OP,Funct,Rt,PCWrite,PCWriteCond,PCSrc,IRWrite,RegDst,MemR
                                     ALUSrc_B <= 2'b00;  // RegB;
                                     ALUOp <= `ALU_SRL;
                                 end
+                                `funct_srav: //算数可变右移 rs rt rd
+                                begin
+                                    ALUSrc_A <= 2'b00; // RegA;
+                                    ALUSrc_B <= 2'b00;  // RegB;
+                                    ALUOp <= `ALU_SRA;
+                                end
+                                `funct_sra: //算数右移 rs rt rd
+                                begin
+                                    ALUSrc_A <= 2'b10; // shamt
+                                    ALUSrc_B <= 2'b00;  // RegB;
+                                    ALUOp <= `ALU_SRA;
+                                end
                                 `funct_sub:
                                 begin
                                     ALUSrc_A <= 2'b00; // RegA;
@@ -314,6 +327,18 @@ module Control(clk,rst,OP,Funct,Rt,PCWrite,PCWriteCond,PCSrc,IRWrite,RegDst,MemR
                                     ALUSrc_A <= 2'b00; // RegA;
                                     ALUSrc_B <= 2'b00;  // RegB;
                                     ALUOp <= `ALU_XOR;
+                                end
+                                `funct_slt:
+                                begin
+                                    ALUSrc_A <= 2'b00; // RegA;
+                                    ALUSrc_B <= 2'b00;  // RegB;
+                                    ALUOp <= `ALU_SLT;
+                                end
+                                `funct_sltu:
+                                begin
+                                    ALUSrc_A <= 2'b00; // RegA;
+                                    ALUSrc_B <= 2'b00;  // RegB;
+                                    ALUOp <= `ALU_SLTU;
                                 end
                             endcase
                         end

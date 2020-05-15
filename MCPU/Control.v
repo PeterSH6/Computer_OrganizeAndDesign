@@ -42,6 +42,7 @@ module Control(clk,rst,OP,Funct,Rt,PCWrite,PCWriteCond,PCSrc,IRWrite,RegDst,MemR
             begin
                 PCWrite <= 1'b1;
                 PCWriteCond <= 1'b0;
+                RegWrite <= 1'b0;
                 ALUSrc_A <= 2'b01; //PC
                 ALUSrc_B <= 2'b01; //4
                 IRWrite <= 1'b1;
@@ -407,13 +408,13 @@ module Control(clk,rst,OP,Funct,Rt,PCWrite,PCWriteCond,PCSrc,IRWrite,RegDst,MemR
                     `OP_bgez_bltz:
                         begin
                             case(Rt)
-                                5'b00000: //bgtz
-                                begin
-                                    ALUOp <= `ALU_BGTZ;
-                                end
-                                5'b00001:
+                                5'b00000: //bltz
                                 begin
                                     ALUOp <= `ALU_BLTZ;
+                                end
+                                5'b00001: //bgez
+                                begin
+                                    ALUOp <= `ALU_BGEZ;
                                 end
                             endcase
                         end
@@ -434,6 +435,7 @@ module Control(clk,rst,OP,Funct,Rt,PCWrite,PCWriteCond,PCSrc,IRWrite,RegDst,MemR
             `Jump_Completion:
             begin
                 PCWrite <= 1'b1;
+                state <= `Instruction_Fetch;
                 case(OP)
                     `OP_j:
                         begin

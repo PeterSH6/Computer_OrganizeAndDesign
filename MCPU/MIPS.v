@@ -97,7 +97,7 @@ module MIPS(clk,rst);
     //MUX PCSrc
     wire [1:0] PCSrc;
     mux4 MUX_PCSrc(.d1(ALUOut_o),.d0(ALUResult)
-    ,.d2({PC_o[31:28],Instr_o[25:0]<<2,2'b00})
+    ,.d2({PC_o[31:28],Instr_o[25:0],2'b00}) //此处Instr_o不用右移动
     ,.d3(RegA_o),.s(PCSrc),.y(PC_i));
 
     //Control

@@ -84,7 +84,7 @@ module MIPS(clk,rst);
     wire [1:0] MemWrBits;
     wire [2:0] MemRBits;
     wire [31:0]ReadData;
-    DM DataMemory(.clk(clk),.MemR(MemR),.MemWr(MemWr),.MemWrBits(MemWrBits),.MemRBits(MemRBits),.addr(ALUOut_o),.data(ALUSrcB),.ReadData(ReadData));
+    DM DataMemory(.clk(clk),.MemR(MemR),.MemWr(MemWr),.MemWrBits(MemWrBits),.MemRBits(MemRBits),.addr(ALUOut_o),.data(RegB_o),.ReadData(ReadData)); //从b寄存器中直接读
 
     //MemData Register OK
     wire [31:0] MemData_o;

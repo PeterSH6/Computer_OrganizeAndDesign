@@ -105,7 +105,7 @@ module Control(clk,rst,OP,Funct,Rt,PCWrite,PCWriteCond,PCSrc,IRWrite,RegDst,MemR
             `Memory_Address_Computation:
             begin
                 ALUSrc_A <= 2'b00 ; //RegA
-                ALUSrc_B <= 2'b11 ; //sign-extend <<2
+                ALUSrc_B <= 2'b10 ; //sign-extend
                 ALUOp <= `ALU_ADD ; //compute address;
                 RegWrite <= 1'b0;
                 PCWriteCond <= 1'b0;
@@ -478,7 +478,17 @@ module Control(clk,rst,OP,Funct,Rt,PCWrite,PCWriteCond,PCSrc,IRWrite,RegDst,MemR
                         end
                 endcase
             end //endJmp
-
+            `MemRead_Completion:
+            begin
+                RegDst <= 2'b00; //rt
+                RegWrite <= 1'b1;
+                MemtoReg <= 2'b00; //MemData_o
+                PCWrite <= 1'b0;
+                PCWriteCond <= 1'b0;
+                MemWrite <= 1'b0;
+                IRWrite <= 1'b0;
+                state <= `Instruction_Fetch;
+            end
         endcase    //endstate
     end//endalways
 endmodule

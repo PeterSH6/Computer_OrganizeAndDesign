@@ -120,32 +120,28 @@ module MIPS(clk,rst);
     wire IDEXJumpSrc <= 1'b0;
     wire [31:0] IDEXInstruction <= 32'b0;
     wire [4:0] IDEXALUOp <= 5'b0;
-    wire [4:0] IDEXRegRD  <= 5'b0;
+    wire [4:0] IDEXRegRd  <= 5'b0;
     IDEXReg IDEXReg(.clk(clk),.rst(rst),.IDEXStall(IDEXStall),.IDEXFlush(IDEXFlush),.RD1_i(ReadData1),.IDEXRD1(IDEXRD1),.RD2_i(ReadData2),.IDEXRD2(IDEXRD2)
     ,.PCPlus4_i(IFIDPCPlus4),.IDEXPCPlus4(IDEXPCPlus4),.SignEXT_i(SignEXTOffset),.IDEXSignEXT(IDEXSignEXT),.Instruction(IFIDInstruction),.IDEXInstruction(IDEXInstruction)
-    ,.WriteBackDst(RegDstIn),.IDEXRegRD(IDEXRegRD),.RegWrite(RegWrite),.IDEXRegWrite(IDEXRegWrite)
+    ,.WriteBackDst(RegDstIn),.IDEXRegRd(IDEXRegRd),.RegWrite(RegWrite),.IDEXRegWrite(IDEXRegWrite)
     ,.ALUOp(ALUOp),.IDEXALUOp(IDEXALUOp),.MemRead(IDEXMemRead),.MemWrite(IDEXMemWrite),.NPCType(IDEXNPCType)
     ,.MemRBits(IDEXMemRBits),.MemWrBits(IDEXMemWrBits),MemtoReg(IDEXMemtoReg),.ALUSrc_A(IDEXALUSrc_A),.ALUSrc_B(IDEXALUSrc_B),.JumpSrc(JumpSrc),.IDEXJumpSrc(IDEXJumpSrc));
 
 
 //------------------------EX Stage--------------------------
-   //MUX_ForwardC
-   wire [1:0] ForwardC;
-   wire [31:0] GPR_RS;
-   wire [31:0] EXMEMALUResult;
-   mux4 MUX_ForwardC(.d0(IDEXRD1),.d1(WriteDataFinal),.d2(EXMEMALUResult),.s(ForwardC),.y(GPR_RS));
-
-   //JumpAddress unit
-   JumpAddress JumpAddress(.IDEXPCPlus4(IDEXPCPlus4),.IDEXInstruction(IDEXInstruction),.GPR_RS(GPR_RS),.IDEXJumpSrc(IDEXJumpSrc),.JumpPC(JumpPC));
-
     //MUX_ForwardA
     wire [1:0] ForwardA;
     wire  [31:0] ALUSrcA_First;
+    wire [31:0] EXMEMALUResult;
     mux4 MUX_ForwardA(.d0(IDEXRD1),.d1(WriteDataFinal),.d2(EXMEMALUResult),.s(ForwardA),.y(ALUSrcA_First));
 
     //MUX_ALUSrcA
     wire [31:0] ALUSrcAData;
     mux2 MUX_ALUSrcA(.d0(ALUSrcA_First),.d1(IDEXInstruction[10:6]).s(IDEXALUSrc_A),.y(ALUSrcAData));
+
+    //JumpAddress unit
+    //ALUSrcA_First为Forward后的结果，可以解决jalr，jr中使用rs的数据冒险问题
+   JumpAddress JumpAddress(.IDEXPCPlus4(IDEXPCPlus4),.IDEXInstruction(IDEXInstruction),.GPR_RS(ALUSrcA_First),.IDEXJumpSrc(IDEXJumpSrc),.JumpPC(JumpPC));
 
     //MUX_ForwardB
     wire [1:0] ForwardB;
@@ -165,8 +161,57 @@ module MIPS(clk,rst);
     //NextType在HazardDetect中最后生成所需要的PCSrc1信号用作选择
     Branch_Jump_Detect Branch_Jump_Detect(.NPCType(IDEXNPCType),.Zero(Zero),.NextType(NextType));
 
-    //ForWardUnit
+    //ForwardUnit
+    wire EXMEMRegWrite;
+    wire [4:0] EXMemRegRd;
+    wire [4:0] MEMWBRegRd;
+    ForwardUnit ForwardUnit(.EXMEMRegWrite(EXMEMRegWrite),.EXMEMRegRd(EXMEMRegRd),.IDEXRegRs(IDEXInstruction[25:21])
+    ,.IDEXRegRt(IDEXInstruction[20:16]),.MEMWBRegWrite(MEMWBRegWrite),.MEMWBRegRd(MEMWBRegRd)
+    .ForwardA(ForwardA),.ForwardB(ForwardB));
 
+    //EXMEMReg
+    wire EXMEMStall;
+    assign EXMEMStall = 1'b0;
+    wire EXMEMFlush;
+    assign EXMEMFlush = 1'b0;
+    wire [31:0] EXMEMInstruction;
+    wire [31:0] EXMEMPCPlus4;
+    wire [31:0] EXMEMMemWriteData;
+    wire EXMEMMemWrite;
+    wire EXMEMMemWrBits;
+    wire EXMEMMemRead;
+    wire [1:0] EXMEMMemRBits;
+    wire [1:0] EXMEMMemtoReg;
+    EXMEMReg EXMEMReg(
+     .clk(clk),
+     .rst(rst),
+     .EXMEMStall(EXMEMStall),
+     .EXMEMFlush(EXMEMFlush),
+     .IDEXInstruction(IDEXInstruction),
+     .EXMEMInstruction(EXMEMInstruction),
+     .IDEXPCPlus4(IDEXPCPlus4),
+     .EXMEMPCPlus4(EXMEMPCPlus4),
+     .IDEXMemWriteData(ALUSrcB_First), //store value
+     .EXMEMMemWriteData(EXMEMMemWriteData),
+     .ALUResult(ALUResult),
+     .EXMEMALUResult(EXMEMALUResult),
+     .IDEXRegRd(IDEXRegRd),
+     .EXMEMRegRd(EXMEMRegRd),
+     .IDEXRegWrite(IDEXRegWrite),
+     .EXMEMRegWrite(EXMEMRegWrite),
+     .IDEXMemWrite(IDEXMemWrite),
+     .EXMEMMemWrite(EXMEMMemWrite),
+     .IDEXMemWrBits(IDEXMemWrBits),
+     .EXMEMMemWrBits(EXMEMMemWrBits),
+     .IDEXMemRead(IDEXMemRead),
+     .EXMEMMemRead(EXMEMMemRead),
+     .IDEXMemRBits(IDEXMemRBits),
+     .EXMEMMemRBits(EXMEMMemRBits),
+     .IDEXMemtoReg(IDEXMemtoReg),
+     .EXMEMMemtoReg(EXMEMMemtoReg)
+    )
+
+    //-------------------MEM Stage-------------------------------
 
 
 

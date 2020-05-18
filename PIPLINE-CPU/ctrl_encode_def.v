@@ -21,6 +21,10 @@
 `define BranchWrong 2'b10
 `define Jump        2'b11
 
+//Forward
+`define EXMEMForward 2'b10;
+`define MEMWBForward 2'b01;
+
 //MemR
 `define MemR_lw     3'b000
 `define MemR_lh     3'b001

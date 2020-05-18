@@ -12,7 +12,7 @@
 
   integer i;
 
-  always @(posedge clk, posedge rst)//保证前半周期写，后半周期读
+  always @(posedge clk, posedge rst)//从MEM/WB寄存器中写入，应为posedge
     if (rst) begin    //  reset
       for (i=0; i<32; i=i+1)
         rf[i] <= 0; //  i;

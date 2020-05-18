@@ -11,7 +11,7 @@ module PC( clk, rst, NPC, PC, PC_Write_Final );
       PC <= 32'h0000_0000;
     end
 
-  always @(negedge clk, posedge rst)
+  always @(posedge clk, posedge rst)//下降沿更新pc,
     begin
     if (rst) 
       PC <= 32'h0000_0000;

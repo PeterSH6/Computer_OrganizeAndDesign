@@ -9,7 +9,8 @@ module alu(A,B,ALUOp,C,Zero);
    reg [31:0] C;
    integer    i;
    //integer   Ai = A;
-   always @( * ) begin
+   always @( * )
+    begin
       case ( ALUOp )
           `ALU_NOP:  C = A;                          // NOP
           `ALU_ADD:  C = A + B;                      // ADD/ADDU

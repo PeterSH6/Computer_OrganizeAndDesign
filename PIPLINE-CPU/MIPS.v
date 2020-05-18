@@ -120,16 +120,62 @@ module MIPS(clk,rst);
     wire IDEXJumpSrc <= 1'b0;
     wire [31:0] IDEXInstruction <= 32'b0;
     wire [4:0] IDEXALUOp <= 5'b0;
-    wire [4:0] IDEXWriteBackDst  <= 5'b0;
+    wire [4:0] IDEXRegRD  <= 5'b0;
     IDEXReg IDEXReg(.clk(clk),.rst(rst),.IDEXStall(IDEXStall),.IDEXFlush(IDEXFlush),.RD1_i(ReadData1),.IDEXRD1(IDEXRD1),.RD2_i(ReadData2),.IDEXRD2(IDEXRD2)
     ,.PCPlus4_i(IFIDPCPlus4),.IDEXPCPlus4(IDEXPCPlus4),.SignEXT_i(SignEXTOffset),.IDEXSignEXT(IDEXSignEXT),.Instruction(IFIDInstruction),.IDEXInstruction(IDEXInstruction)
-    ,.WriteBackDst(RegDstIn),.IDEXWriteBackDst(IDEXWriteBackDst),.RegWrite(RegWrite),.IDEXRegWrite(IDEXRegWrite)
+    ,.WriteBackDst(RegDstIn),.IDEXRegRD(IDEXRegRD),.RegWrite(RegWrite),.IDEXRegWrite(IDEXRegWrite)
     ,.ALUOp(ALUOp),.IDEXALUOp(IDEXALUOp),.MemRead(IDEXMemRead),.MemWrite(IDEXMemWrite),.NPCType(IDEXNPCType)
     ,.MemRBits(IDEXMemRBits),.MemWrBits(IDEXMemWrBits),MemtoReg(IDEXMemtoReg),.ALUSrc_A(IDEXALUSrc_A),.ALUSrc_B(IDEXALUSrc_B),.JumpSrc(JumpSrc),.IDEXJumpSrc(IDEXJumpSrc));
 
 
 //------------------------EX Stage--------------------------
-   
+   //MUX_ForwardC
+   wire [1:0] ForwardC;
+   wire [31:0] GPR_RS;
+   wire [31:0] EXMEMALUResult;
+   mux4 MUX_ForwardC(.d0(IDEXRD1),.d1(WriteDataFinal),.d2(EXMEMALUResult),.s(ForwardC),.y(GPR_RS));
+
+   //JumpAddress unit
+   JumpAddress JumpAddress(.IDEXPCPlus4(IDEXPCPlus4),.IDEXInstruction(IDEXInstruction),.GPR_RS(GPR_RS),.IDEXJumpSrc(IDEXJumpSrc),.JumpPC(JumpPC));
+
+    //MUX_ForwardA
+    wire [1:0] ForwardA;
+    wire  [31:0] ALUSrcA_First;
+    mux4 MUX_ForwardA(.d0(IDEXRD1),.d1(WriteDataFinal),.d2(EXMEMALUResult),.s(ForwardA),.y(ALUSrcA_First));
+
+    //MUX_ALUSrcA
+    wire [31:0] ALUSrcAData;
+    mux2 MUX_ALUSrcA(.d0(ALUSrcA_First),.d1(IDEXInstruction[10:6]).s(IDEXALUSrc_A),.y(ALUSrcAData));
+
+    //MUX_ForwardB
+    wire [1:0] ForwardB;
+    wire [31:0] ALUSrcB_First;
+    mux4 MUX_ForwardB(.d0(IDEXRD2),.d1(WriteDataFinal),.d2(EXMEMALUResult),.s(ForwardB),.y(ALUSrcB_First));
+
+    //MUX_ALUSrcB
+    wire [31:0] ALUSrcBData;
+    mux2 MUX_ALUSrcB(.d0(ALUSrcB_First),.d1(SignEXTOffset),.s(IDEXALUSrc_B),.y(ALUSrcBData));
+
+    //ALU
+    wire Zero;
+    wire [31:0] ALUResult;
+    alu ALU(.A(ALUSrcAData),.B(ALUSrcBData),.ALUOp(IDEXALUOp),.C(ALUResult),.Zero(Zero));
+
+    //Branch_Jump_Detect
+    //NextType在HazardDetect中最后生成所需要的PCSrc1信号用作选择
+    Branch_Jump_Detect Branch_Jump_Detect(.NPCType(IDEXNPCType),.Zero(Zero),.NextType(NextType));
+
+    //ForWardUnit
+
+
+
+
+
+
+
+
+
+
     
     //RegisterA OK
     wire [31:0] RegA_o;

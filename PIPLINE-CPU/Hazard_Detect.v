@@ -59,4 +59,7 @@ always @(*)
                         IDEXFlush <= 1'b1;
                         $display("Next PC is Jumps");
                     end
+                endcase
+            end
     end
+endmodule

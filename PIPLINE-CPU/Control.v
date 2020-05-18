@@ -268,14 +268,14 @@ module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
                     begin
                         $display("Control jalr");
                         RegWrite <= 1'b1; //[31] = PC+4
-                        RegDst <= 2'b10; //No.31
+                        RegDst <= 2'b01; //Rd
                         MemtoReg <= 2'b10; //PC+4 ---ALUResult,Load,PC+4
                         NPCType <= 2'b10; // Jump
                         ALUOp <= `ALU_SLT;
                         MemRead <= 1'b0;
                         MemWrite <= 1'b0;
                         PCSrc <= 1'b0; // Not Branch 
-                        ALUSrc_A <= 2'b00; //RD1
+                        ALUSrc_A <= 2'b00; //RD1 or forward
                         ALUSrc_B <= 2'b00; //RD2
                         JumpSrc <= 1'b1; // PC = GPR[rs]
                     end
@@ -606,6 +606,7 @@ module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
         //-----------------------Jump--------------------
         `OP_j:
         begin
+            $display("Control j");
             RegWrite <= 1'b0;
             MemWrite <= 1'b0;
             MemRead <= 1'b0;
@@ -618,6 +619,7 @@ module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
         end
         `OP_jal:
         begin
+            $display("Control jal");
             RegWrite <= 1'b1;
             RegDst <= 2'b10 ; //No.31
             MemtoReg <= 2'b10; //PC + 4

@@ -44,8 +44,8 @@ module MIPS(clk,rst);
    wire IFIDStall;
    wire IFIDFlush;
    wire [31:0] IFIDInstruction;
-   wire [31:0] PCPlus4_o;
-   IFIDReg IFIDReg(.clk(clk),.rst(rst),.IFIDStall(IFIDStall),.IFIDFlush(IFIDFlush),.PCPlus4_i(PC_o),.Instruction_i(Instruction_i),.PCPlus4_o(PCPlus4_o),.IFIDInstruction(IFIDInstruction));
+   wire [31:0] IFIDPCPlus4;
+   IFIDReg IFIDReg(.clk(clk),.rst(rst),.IFIDStall(IFIDStall),.IFIDFlush(IFIDFlush),.PCPlus4_i(PC_o),.Instruction_i(Instruction_i),.PCPlus4_o(IFIDPCPlus4),.IFIDInstruction(IFIDInstruction));
 
 
 //-------------------------ID Stage-----------------------------
@@ -72,7 +72,7 @@ module MIPS(clk,rst);
     EXT16 EXTOffset(.Imm16(IFIDInstruction[15:0]),.EXTOp(1'b1),.Imm32(SignEXTOffset));
 
     //BranchAdd
-    BranchAdd BranchAdd(.PCPlus4(PCPlus4_o),.SignEXTOffset(SignEXTOffset),.BranchPC(BranchPC));
+    BranchAdd BranchAdd(.PCPlus4(IFIDPCPlus4),.SignEXTOffset(SignEXTOffset),.BranchPC(BranchPC));
 
     //Control
     wire MemR;
@@ -99,7 +99,33 @@ module MIPS(clk,rst);
     wire [31:0] IDEXIntruction;
     Hazard_Detect Hazard_Detect(.NextType(NextType),.IDEXMEMRead(MemR),.IDEXRt(IDEXIntruction[20:16])
     ,.IFIDRs(IFIDInstruction[25:21]),.IFIDRt(IFIDInstruction[20:16]),.IFIDStall(IFIDStall),.IFIDFlush(IFIDFlush)
-    ,.PCSrc(PCSrc1),.PCWrite(PCWrite),.IDEXFlush(IDEXFlush))
+    ,.PCSrc(PCSrc1),.PCWrite(PCWrite),.IDEXFlush(IDEXFlush));
+
+    //IDEXReg
+    wire IDEXStall;
+    assign IDEXStall = 1'b0;
+    wire [31:0] IDEXRD1;
+    wire [31:0] IDEXRD2;
+    wire [1:0] IDEXALUSrc_A <= 2'b0;
+    wire [1:0] IDEXALUSrc_B <= 2'b0;
+    wire IDEXSignEXT <= 1'b0;
+    wire IDEXRegWrite <= 1'b0;
+    wire [31:0] IDEXPCPlus4 <= 32'b0;
+    wire [1:0] IDEXNPCType<= 2'b0;
+    wire IDEXMemWrite <= 1'b0;
+    wire [1:0] IDEXMemWrBits <= 2'b0;
+    wire [1:0] IDEXMemtoReg <= 2'b0;
+    wire IDEXMemRead <= 1'b0;
+    wire [2:0] IDEXMemRBits <= 3'b0;
+    wire IDEXJumpSrc <= 1'b0;
+    wire [31:0] IDEXInstruction <= 32'b0;
+    wire [4:0] IDEXALUOp <= 5'b0;
+    wire [4:0] IDEXWriteBackDst  <= 5'b0;
+    IDEXReg IDEXReg(.clk(clk),.rst(rst),.IDEXStall(IDEXStall),.IDEXFlush(IDEXFlush),.RD1_i(ReadData1),.IDEXRD1(IDEXRD1),.RD2_i(ReadData2),.IDEXRD2(IDEXRD2)
+    ,.PCPlus4_i(IFIDPCPlus4),.IDEXPCPlus4(IDEXPCPlus4),.SignEXT_i(SignEXTOffset),.IDEXSignEXT(IDEXSignEXT),.Instruction(IFIDInstruction),.IDEXInstruction(IDEXInstruction)
+    ,.WriteBackDst(RegDstIn),.IDEXWriteBackDst(IDEXWriteBackDst),.RegWrite(RegWrite),.IDEXRegWrite(IDEXRegWrite)
+    ,.ALUOp(ALUOp),.IDEXALUOp(IDEXALUOp),.MemRead(IDEXMemRead),.MemWrite(IDEXMemWrite),.NPCType(IDEXNPCType)
+    ,.MemRBits(IDEXMemRBits),.MemWrBits(IDEXMemWrBits),MemtoReg(IDEXMemtoReg),.ALUSrc_A(IDEXALUSrc_A),.ALUSrc_B(IDEXALUSrc_B),.JumpSrc(JumpSrc),.IDEXJumpSrc(IDEXJumpSrc));
 
 
 //------------------------EX Stage--------------------------

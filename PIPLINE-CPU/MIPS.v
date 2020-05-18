@@ -18,20 +18,20 @@ module MIPS(clk,rst);
     wire [31:0] PCPlus4;
     wire [31:0] JumpPC;
     wire [31:0] IDEXPCPlus4; //预测错误，需要branch下一条指令
-    wire [1:0] PCSrcControl;//通过Control判定PC源
+    wire [1:0] PCSrc1;//通过Hazard Detect判定PC源
     wire [31:0] NPC_First;
-    mux4 MUX_NPC1(.d0(PCPlus4),.d1(JumpPC),.d2(IDEXPCPlus4),.d3(BranchPC),.s(PCSrcControl),.y(NPC_First));
+    mux4 MUX_NPC1(.d0(PCPlus4),.d1(JumpPC),.d2(IDEXPCPlus4),.d3(BranchPC),.s(PCSrc1),.y(NPC_First));
     
     //MUX_NPC2
     wire [31:0] BranchPC;
     wire [31:0] NPC;
-    wire PCSrcHazard;//通过HazardDetection判断源
+    wire PCSrc2;//通过Control判断源
     mux2 MUX_NPC2(.d0(NPC_First),.d1(BranchPC),.s(PCSrcHazard),.y(NPC));
 
     //PC module
     wire [31:0] PC_o;
-    wire PC_Write_Final;
-    PC my_PC(.clk(clk),.rst(rst),.NPC(NPC),.PC(PC_o),.PC_Write_Final(PC_Write_Final));
+    wire PCWrite;
+    PC my_PC(.clk(clk),.rst(rst),.NPC(NPC),.PC(PC_o),.PC_Write_Final(PCWrite));
 
     //IM module
     wire [31:0] Instruction;
@@ -85,19 +85,21 @@ module MIPS(clk,rst);
     wire [2:0] MemWrBits;
     wire [1:0] MemRBits;
     wire [1:0] NPCType;//传给EX中的Branch判断单元来进行判定。
-    Control Control(.clk(clk),.rst(rst),.OP(Instruction_o[31:26])
-    ,.Funct(Instruction_o[5:0]),.Rs(Instruction_o[25:21]),.Rt(Instruction_o[20:16]),
-    .PCSrc(NPC_First),NPCType(NPCType),
+    wire JumpSrc;//用于JumpAddress中选择相应的JumpPC
+    Control Control(.clk(clk),.rst(rst),.OP(IFIDInstruction[31:26])
+    ,.Funct(IFIDInstruction[5:0]),.Rs(IFIDInstruction[25:21]),.Rt(IFIDInstruction[20:16]),
+    .PCSrc(PCSrc2),NPCType(NPCType),.JumpSrc(JumpSrc),
     .RegDst(RegDst),.MemRead(MemR),.MemtoReg(MemtoReg),.ALUOp(ALUOp),
     .MemWrite(MemWr),.ALUSrc_A(Sig_ALUSrcA),.ALUSrc_B(Sig_ALUSrcB),
     .RegWrite(IDEXRegWrite),.MemWrBits(MemWrBits),.MemRBits(MemRBits));
 
 
     //Hazard Detect
-    
-
-
-
+    wire [1:0] NextType;//从BranchJump检测unit中检测
+    wire [31:0] IDEXIntruction;
+    Hazard_Detect Hazard_Detect(.NextType(NextType),.IDEXMEMRead(MemR),.IDEXRt(IDEXIntruction[20:16])
+    ,.IFIDRs(IFIDInstruction[25:21]),.IFIDRt(IFIDInstruction[20:16]),.IFIDStall(IFIDStall),.IFIDFlush(IFIDFlush)
+    ,.PCSrc(PCSrc1),.PCWrite(PCWrite),.IDEXFlush(IDEXFlush))
 
 
 //------------------------EX Stage--------------------------

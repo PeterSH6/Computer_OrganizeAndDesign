@@ -15,6 +15,12 @@
 `define MemRead_Completion         4'b1001
 `define Rtype_Completion         4'b1010
 
+//NextType
+`define PCPlus4     2'b00
+`define Branch      2'b01
+`define BranchWrong 2'b10
+`define Jump        2'b11
+
 //MemR
 `define MemR_lw     3'b000
 `define MemR_lh     3'b001

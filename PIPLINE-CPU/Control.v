@@ -1,5 +1,5 @@
 `include "ctrl_encode_def.v"
-module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc_A,ALUSrc_B,RegWrite,MemWrBits,MemRBits);
+module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc_A,ALUSrc_B,RegWrite,MemWrBits,MemRBits,JumpSrc);
     input clk;
     input rst;
     input [5:0] OP;
@@ -15,11 +15,13 @@ module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
     output reg [1:0] ALUSrc_A;
     output reg [1:0] ALUSrc_B;
     output reg [1:0] RegDst;
-    output reg [1:0] PCSrc;
+    output reg PCSrc;
+    output reg JumpSrc; //只有NPCType为Jump才有实际作用
 
     initial 
     begin
         MemRead,MemWrite,RegWrite <= 3'b0;
+        NPCType <= 2'b00;
         ALUOp <= 4'b0;
         MemRBits <= 3'b0;
         MemWrBits <= 2'b0;
@@ -27,502 +29,607 @@ module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
         ALUSrc_A <= 2'b0;
         ALUSrc_B <= 2'b0;
         RegDst <= 2'b0;
-        PCSrc <= 2'b00;
+        PCSrc <= 1'b0;
     end
           
     always@(posedge clk)
     begin
         case(Op)
+        //-------------Rtype jalr jr---------------------
             `OP_Rtype,
             `OP_jalr,`OP_jr:
             begin
                 case(Funct)
                     `funct_add:
                     begin
+                        $display("Control add");
                         RegWrite <= 1'b1;
-                        RegDst <= 2'b01; //Rs
+                        RegDst <= 2'b01; //Rd
+                        MemtoReg <= 2'b00;
+                        NPCType <= 2'b00; // PC+4
                         ALUOp <= `ALU_ADD;
                         MemRead <= 1'b0;
                         MemWrite <= 1'b0;
-                        PCSrc <= 2'b00; //PC+4
+                        PCSrc <= 1'b0; //PC+4  
                         ALUSrc_A <= 2'b00; //RD1
                         ALUSrc_B <= 2'b00; //RD2
                     end
-
-            end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            `Initial:
-            begin
-                state <= `Instruction_Fetch;
-            end
-            `Instruction_Fetch:
-            begin
-                PCWrite <= 1'b1;
-                PCWriteCond <= 1'b0;
-                RegWrite <= 1'b0;
-                ALUSrc_A <= 2'b01; //PC
-                ALUSrc_B <= 2'b01; //4
-                IRWrite <= 1'b1;
-                ALUOp <= `ALU_ADD; //PC+4
-                MemWrite <= 1'b0;
-                PCSrc <= 2'b00 ; //PC+4
-                state <= `Instruction_Decode;
-            end
-            `Instruction_Decode:
-            begin
-                PCWriteCond <= 1'b0;
-                PCWrite <= 1'b0;
-                ALUOp <= `ALU_ADD; //PC + sign-extend << 2
-                ALUSrc_A <= 2'b01; //PC
-                ALUSrc_B <= 2'b11; // sign-extend << 2
-                IRWrite <= 1'b0;
-                MemWrite <= 1'b0;
-                RegWrite <= 1'b0;
-                case(OP)
-                    `OP_Rtype,`OP_jalr,`OP_jalr:
+                    `funct_addu:
                     begin
-                        case(Funct)
-                            `funct_jalr,
-                            `funct_jr: //jr的[15:11]为0,写入RF仍为0，所以不用特殊处理
-                            begin
-                                state <= `Jump_Completion;
-                            end
-                            default:
-                            begin
-                                state <= `Execution;
-                            end
-                        endcase
+                        $display("Control addu");
+                        RegWrite <= 1'b1;
+                        RegDst <= 2'b01; //Rd
+                        MemtoReg <= 2'b00;
+                        NPCType <= 2'b00; // PC+4
+                        ALUOp <= `ALU_ADD;
+                        MemRead <= 1'b0;
+                        MemWrite <= 1'b0;
+                        PCSrc <= 1'b0; //PC+4  
+                        ALUSrc_A <= 2'b00; //RD1
+                        ALUSrc_B <= 2'b00; //RD2
                     end
-                    `OP_lh,`OP_lhu,`OP_lw,
-                    `OP_lb,`OP_lbu,`OP_sb,
-                    `OP_sh,`OP_sw:
+                    `funct_sub:
                     begin
-                        state <= `Memory_Address_Computation;
+                        $display("Control sub");
+                        RegWrite <= 1'b1;
+                        RegDst <= 2'b01; //Rd
+                        MemtoReg <= 2'b00;
+                        NPCType <= 2'b00; // PC+4
+                        ALUOp <= `ALU_SUB;
+                        MemRead <= 1'b0;
+                        MemWrite <= 1'b0;
+                        PCSrc <= 1'b0; //PC+4  
+                        ALUSrc_A <= 2'b00; //RD1
+                        ALUSrc_B <= 2'b00; //RD2
                     end
-                    `OP_beq,`OP_bgez_bltz,`OP_bgtz,
-                    `OP_blez,`OP_bne:
+                    `funct_subu:
                     begin
-                        state <= `Branch_Completion;
+                        $display("Control subu");
+                        RegWrite <= 1'b1;
+                        RegDst <= 2'b01; //Rd
+                        MemtoReg <= 2'b00;
+                        NPCType <= 2'b00; // PC+4
+                        ALUOp <= `ALU_SUB;
+                        MemRead <= 1'b0;
+                        MemWrite <= 1'b0;
+                        PCSrc <= 1'b0; //PC+4  
+                        ALUSrc_A <= 2'b00; //RD1
+                        ALUSrc_B <= 2'b00; //RD2
                     end
-                    `OP_addi,`OP_addiu,`OP_andi,
-                    `OP_lui,`OP_ori,`OP_slti,
-                    `OP_slti,`OP_sltiu,`OP_xori:
+                    `funct_sll:
                     begin
-                        state <= `Execution;
+                        $display("Control sll");
+                        RegWrite <= 1'b1;
+                        RegDst <= 2'b01; //Rd
+                        MemtoReg <= 2'b00;
+                        NPCType <= 2'b00; // PC+4
+                        ALUOp <= `ALU_SLL;
+                        MemRead <= 1'b0;
+                        MemWrite <= 1'b0;
+                        PCSrc <= 1'b0; //PC+4  
+                        ALUSrc_A <= 2'b01; //Shamt
+                        ALUSrc_B <= 2'b00; //RD2
                     end
-                    `OP_j,`OP_jal:
+                    `funct_sra:
                     begin
-                        state <= `Jump_Completion;
+                        $display("Control sra");
+                        RegWrite <= 1'b1;
+                        RegDst <= 2'b01; //Rd
+                        MemtoReg <= 2'b00;
+                        NPCType <= 2'b00; // PC+4
+                        ALUOp <= `ALU_SRA;
+                        MemRead <= 1'b0;
+                        MemWrite <= 1'b0;
+                        PCSrc <= 1'b0; //PC+4  
+                        ALUSrc_A <= 2'b01; //Shamt
+                        ALUSrc_B <= 2'b00; //RD2
                     end
-                    default:
+                    `funct_srl:
                     begin
-                        state <= `Initial;
+                        $display("Control srl");
+                        RegWrite <= 1'b1;
+                        RegDst <= 2'b01; //Rd
+                        MemtoReg <= 2'b00;
+                        NPCType <= 2'b00; // PC+4
+                        ALUOp <= `ALU_SRL;
+                        MemRead <= 1'b0;
+                        MemWrite <= 1'b0;
+                        PCSrc <= 1'b0; //PC+4  
+                        ALUSrc_A <= 2'b01; //Shamt
+                        ALUSrc_B <= 2'b00; //RD2
                     end
-                endcase 
-            end
-            `Memory_Address_Computation:
-            begin
-                ALUSrc_A <= 2'b00 ; //RegA
-                ALUSrc_B <= 2'b10 ; //sign-extend
-                ALUOp <= `ALU_ADD ; //compute address;
-                RegWrite <= 1'b0;
-                PCWriteCond <= 1'b0;
-				PCWrite <= 1'b0;
-				MemWrite <= 1'b0;
-				IRWrite <= 1'b0;
-                case(OP)
-                    `OP_lh,`OP_lhu,`OP_lw,
-                    `OP_lb,`OP_lbu:
+                    `funct_srlv:
                     begin
-                        state <= `Memory_Access_Load;
+                        $display("Control srlv");
+                        RegWrite <= 1'b1;
+                        RegDst <= 2'b01; //Rd
+                        MemtoReg <= 2'b00;
+                        NPCType <= 2'b00; // PC+4
+                        ALUOp <= `ALU_SRL;
+                        MemRead <= 1'b0;
+                        MemWrite <= 1'b0;
+                        PCSrc <= 1'b0; //PC+4  
+                        ALUSrc_A <= 2'b00; //RD1
+                        ALUSrc_B <= 2'b00; //RD2
                     end
-                    `OP_sb,
-                    `OP_sh,`OP_sw:
+                    `funct_srav:
                     begin
-                        state <= `Memory_Access_Store;
+                        $display("Control srav");
+                        RegWrite <= 1'b1;
+                        RegDst <= 2'b01; //Rd
+                        MemtoReg <= 2'b00;
+                        NPCType <= 2'b00; // PC+4
+                        ALUOp <= `ALU_SRA;
+                        MemRead <= 1'b0;
+                        MemWrite <= 1'b0;
+                        PCSrc <= 1'b0; //PC+4  
+                        ALUSrc_A <= 2'b00; //RD1
+                        ALUSrc_B <= 2'b00; //RD2
                     end
-                    default:
+                    `funct_sllv:
                     begin
-                        state <= `Initial;
+                        $display("Control sllv");
+                        RegWrite <= 1'b1;
+                        RegDst <= 2'b01; //Rd
+                        MemtoReg <= 2'b00;
+                        NPCType <= 2'b00; // PC+4
+                        ALUOp <= `ALU_SLL;
+                        MemRead <= 1'b0;
+                        MemWrite <= 1'b0;
+                        PCSrc <= 1'b0; //PC+4  
+                        ALUSrc_A <= 2'b00; //RD1
+                        ALUSrc_B <= 2'b00; //RD2
                     end
-                endcase
-            end
-            `Memory_Access_Load:
-            begin
-                MemRead <= 1'b1;
-                RegWrite <= 1'b0;
-				PCWriteCond <= 1'b0;
-				PCWrite <= 1'b0;
-				MemWrite <= 1'b0;
-				IRWrite <= 1'b0;
-                state <= `MemRead_Completion;
-                case(OP)
-                    `OP_lw:
+                    `funct_and:
                     begin
-                        MemRBits <= `MemR_lw;
+                        $display("Control and");
+                        RegWrite <= 1'b1;
+                        RegDst <= 2'b01; //Rd
+                        MemtoReg <= 2'b00;
+                        NPCType <= 2'b00; // PC+4
+                        ALUOp <= `ALU_AND;
+                        MemRead <= 1'b0;
+                        MemWrite <= 1'b0;
+                        PCSrc <= 1'b0; //PC+4  
+                        ALUSrc_A <= 2'b00; //RD1
+                        ALUSrc_B <= 2'b00; //RD2
                     end
-                    `OP_lh:
+                    `funct_or:
                     begin
-                        MemRBits <= `MemR_lh;
+                        $display("Control or");
+                        RegWrite <= 1'b1;
+                        RegDst <= 2'b01; //Rd
+                        MemtoReg <= 2'b00;
+                        NPCType <= 2'b00; // PC+4
+                        ALUOp <= `ALU_OR;
+                        MemRead <= 1'b0;
+                        MemWrite <= 1'b0;
+                        PCSrc <= 1'b0; //PC+4  
+                        ALUSrc_A <= 2'b00; //RD1
+                        ALUSrc_B <= 2'b00; //RD2
                     end
-                    `OP_lhu:
+                    `funct_xor:
                     begin
-                        MemRBits <= `MemR_lhu;
+                        $display("Control xor");
+                        RegWrite <= 1'b1;
+                        RegDst <= 2'b01; //Rd
+                        MemtoReg <= 2'b00;
+                        NPCType <= 2'b00; // PC+4
+                        ALUOp <= `ALU_XOR;
+                        MemRead <= 1'b0;
+                        MemWrite <= 1'b0;
+                        PCSrc <= 1'b0; //PC+4  
+                        ALUSrc_A <= 2'b00; //RD1
+                        ALUSrc_B <= 2'b00; //RD2
                     end
-                    `OP_lb:
+                    `funct_nor:
                     begin
-                        MemRBits <= `MemR_lb;
+                        $display("Control nor");
+                        RegWrite <= 1'b1;
+                        RegDst <= 2'b01; //Rd
+                        MemtoReg <= 2'b00;
+                        NPCType <= 2'b00; // PC+4
+                        ALUOp <= `ALU_NOR;
+                        MemRead <= 1'b0;
+                        MemWrite <= 1'b0;
+                        PCSrc <= 1'b0; //PC+4  
+                        ALUSrc_A <= 2'b00; //RD1
+                        ALUSrc_B <= 2'b00; //RD2
                     end
-                    `OP_lbu:
+                    `funct_slt:
                     begin
-                        MemRBits <= `MemR_lbu;
+                        $display("Control slt");
+                        RegWrite <= 1'b1;
+                        RegDst <= 2'b01; //Rd
+                        MemtoReg <= 2'b00;
+                        NPCType <= 2'b00; // PC+4
+                        ALUOp <= `ALU_SLT;
+                        MemRead <= 1'b0;
+                        MemWrite <= 1'b0;
+                        PCSrc <= 1'b0; //PC+4  
+                        ALUSrc_A <= 2'b00; //RD1
+                        ALUSrc_B <= 2'b00; //RD2
                     end
-                endcase
-            end
-            `Memory_Access_Store:
-            begin
-                MemWrite <= 1'b1;
-                RegWrite <= 1'b0;
-				PCWriteCond <= 1'b0;
-				PCWrite <= 1'b0;
-				IRWrite <= 1'b0;
-                state <= `Instruction_Fetch;
-                case(OP)
-                    `OP_sw:
+                    `funct_sltu:
                     begin
-                    MemWrBits <= `MemWr_sw;
+                        $display("Control sltu");
+                        RegWrite <= 1'b1;
+                        RegDst <= 2'b01; //Rd
+                        MemtoReg <= 2'b00;
+                        NPCType <= 2'b00; // PC+4
+                        ALUOp <= `ALU_SLTU;
+                        MemRead <= 1'b0;
+                        MemWrite <= 1'b0;
+                        PCSrc <= 1'b0; //PC+4  
+                        ALUSrc_A <= 2'b00; //RD1
+                        ALUSrc_B <= 2'b00; //RD2
                     end
-                    `OP_sh:
+                    `funct_jalr:
                     begin
-                    MemWrBits <= `MemWr_sh;
+                        $display("Control jalr");
+                        RegWrite <= 1'b1; //[31] = PC+4
+                        RegDst <= 2'b10; //No.31
+                        MemtoReg <= 2'b10; //PC+4 ---ALUResult,Load,PC+4
+                        NPCType <= 2'b10; // Jump
+                        ALUOp <= `ALU_SLT;
+                        MemRead <= 1'b0;
+                        MemWrite <= 1'b0;
+                        PCSrc <= 1'b0; // Not Branch 
+                        ALUSrc_A <= 2'b00; //RD1
+                        ALUSrc_B <= 2'b00; //RD2
+                        JumpSrc <= 1'b1; // PC = GPR[rs]
                     end
-                    `OP_sb:
+                    `funct_jr: //only Jump,no Store to RF
                     begin
-                    MemWrBits <= `MemWr_sb;
-                    end
-                endcase
-            end
-            `Execution:
-            begin
-                RegWrite <= 1'b0;
-                PCWriteCond <= 1'b0;
-				PCWrite <= 1'b0;
-				MemWrite <= 1'b0;
-				IRWrite <= 1'b0;
-                state <= `Rtype_Completion;
-                case(OP)
-                    `OP_addi:
-                        begin
-                            ALUSrc_A <= 2'b00; //RegA
-                            ALUSrc_B <= 2'b10;//signextend
-                            ALUOp <= `ALU_ADD;
-                        end
-                    `OP_addiu:
-                        begin
-                            ALUSrc_A <= 2'b00; //RegA
-                            ALUSrc_B <= 2'b10;//signextend
-                            ALUOp <= `ALU_ADD;
-                        end
-                    `OP_andi:
-                        begin
-                            ALUSrc_A <= 2'b00; //RegA
-                            ALUSrc_B <= 2'b10;//signextend
-                            ALUOp <= `ALU_ANDI;
-                        end
-                    `OP_lui:
-                        begin
-                            ALUSrc_A <= 2'b00; //RegA
-                            ALUSrc_B <= 2'b10;//signextend
-                            ALUOp <= `ALU_LUI;
-                        end
-                    `OP_ori:
-                        begin
-                            ALUSrc_A <= 2'b00; //RegA
-                            ALUSrc_B <= 2'b10;//signextend
-                            ALUOp <= `ALU_ORI;
-                        end
-                    `OP_xori:
-                        begin
-                            ALUSrc_A <= 2'b00; //RegA
-                            ALUSrc_B <= 2'b10;//signextend
-                            ALUOp <= `ALU_XORI;
-                        end
-                    `OP_slti:
-                        begin
-                            ALUSrc_A <= 2'b00; //RegA
-                            ALUSrc_B <= 2'b10;//signextend
-                            ALUOp <= `ALU_SLT;
-                        end
-                    `OP_sltiu:
-                        begin
-                            ALUSrc_A <= 2'b00; //RegA
-                            ALUSrc_B <= 2'b10;//signextend
-                            ALUOp <= `ALU_SLTU;
-                        end
-                    `OP_Rtype:
-                        begin
-                            case(Funct)
-                                `funct_add:
-                                begin
-                                    ALUSrc_A <= 2'b00; // RegA;
-                                    ALUSrc_B <= 2'b00;  // RegB;
-                                    ALUOp <= `ALU_ADD;
-                                end
-                                `funct_addu:
-                                begin
-                                    ALUSrc_A <= 2'b00; // RegA;
-                                    ALUSrc_B <= 2'b00;  // RegB;
-                                    ALUOp <= `ALU_ADD;
-                                end
-                                `funct_and:
-                                begin
-                                    ALUSrc_A <= 2'b00; // RegA;
-                                    ALUSrc_B <= 2'b00;  // RegB;
-                                    ALUOp <= `ALU_AND;
-                                end
-                                `funct_nor:
-                                begin
-                                    ALUSrc_A <= 2'b00; // RegA;
-                                    ALUSrc_B <= 2'b00;  // RegB;
-                                    ALUOp <= `ALU_NOR;
-                                end
-                                `funct_or:
-                                begin
-                                    ALUSrc_A <= 2'b00; // RegA;
-                                    ALUSrc_B <= 2'b00;  // RegB;
-                                    ALUOp <= `ALU_OR;
-                                end
-                                `funct_sll: //逻辑左移 rt,rd shamt
-                                begin
-                                    ALUSrc_A <= 2'b10; // shamt;
-                                    ALUSrc_B <= 2'b00;  // RegB;
-                                    ALUOp <= `ALU_SLL;
-                                end
-                                `funct_sllv: //逻辑可变左移 rs rt rd
-                                begin
-                                    ALUSrc_A <= 2'b00; // RegA;
-                                    ALUSrc_B <= 2'b00;  // RegB;
-                                    ALUOp <= `ALU_SLL;
-                                end
-                                `funct_srl: //逻辑右移 rt,rd shamt
-                                begin
-                                    ALUSrc_A <= 2'b10; // shamt;
-                                    ALUSrc_B <= 2'b00 ; // RegB;
-                                    ALUOp <= `ALU_SRL;
-                                end
-                                `funct_srlv: //逻辑可变右移 rs rt rd
-                                begin
-                                    ALUSrc_A <= 2'b00; // RegA;
-                                    ALUSrc_B <= 2'b00;  // RegB;
-                                    ALUOp <= `ALU_SRL;
-                                end
-                                `funct_srav: //算数可变右移 rs rt rd
-                                begin
-                                    ALUSrc_A <= 2'b00; // RegA;
-                                    ALUSrc_B <= 2'b00;  // RegB;
-                                    ALUOp <= `ALU_SRA;
-                                end
-                                `funct_sra: //算数右移 rs rt rd
-                                begin
-                                    ALUSrc_A <= 2'b10; // shamt
-                                    ALUSrc_B <= 2'b00;  // RegB;
-                                    ALUOp <= `ALU_SRA;
-                                end
-                                `funct_sub:
-                                begin
-                                    ALUSrc_A <= 2'b00; // RegA;
-                                    ALUSrc_B <= 2'b00;  // RegB;
-                                    ALUOp <= `ALU_SUB;
-                                end
-                                `funct_subu:
-                                begin
-                                    ALUSrc_A <= 2'b00; // RegA;
-                                    ALUSrc_B <= 2'b00 ; // RegB;
-                                    ALUOp <= `ALU_SUB;
-                                end
-                                `funct_xor:
-                                begin
-                                    ALUSrc_A <= 2'b00; // RegA;
-                                    ALUSrc_B <= 2'b00;  // RegB;
-                                    ALUOp <= `ALU_XOR;
-                                end
-                                `funct_slt:
-                                begin
-                                    ALUSrc_A <= 2'b00; // RegA;
-                                    ALUSrc_B <= 2'b00;  // RegB;
-                                    ALUOp <= `ALU_SLT;
-                                end
-                                `funct_sltu:
-                                begin
-                                    ALUSrc_A <= 2'b00; // RegA;
-                                    ALUSrc_B <= 2'b00;  // RegB;
-                                    ALUOp <= `ALU_SLTU;
-                                end
-                            endcase
-                        end
-                endcase
-            end//Execution
-            `Rtype_Completion:
-            begin
-                RegWrite <= 1'b1;
-                PCWriteCond <= 1'b0;
-				PCWrite <= 1'b0;
-				MemWrite <= 1'b0;
-				IRWrite <= 1'b0;
-                MemtoReg <= 2'b01; //ALUOut_o
-                state <= `Instruction_Fetch;
-                case(OP)
-                    `OP_Rtype:
-                    begin
-                        RegDst <= 2'b01; //rd
-                    end
-                    `OP_addi:
-                    begin
-                        RegDst <= 2'b00; //rt
-                    end
-                    `OP_addiu:
-                    begin
-                        RegDst <= 2'b00; //rt
-                    end
-                    `OP_andi:
-                    begin
-                        RegDst <= 2'b00; //rt
-                    end
-                    `OP_lui:
-                    begin
-                        RegDst <= 2'b00; //rt
-                    end
-                    `OP_ori:
-                    begin
-                        RegDst <= 2'b00; //rt
-                    end
-                    `OP_slti:
-                    begin
-                        RegDst <= 2'b00; //rt
-                    end
-                    `OP_sltiu:
-                    begin
-                        RegDst <= 2'b00; //rt
-                    end
-                    `OP_xori:
-                    begin
-                        RegDst <= 2'b00; //rt
+                        $display("Control jr");
+                        RegWrite <= 1'b0; 
+                        RegDst <= 2'b00;
+                        MemtoReg <= 2'b10; //PC+4 ---ALUResult,Load,PC+4
+                        NPCType <= 2'b10; // Jump
+                        ALUOp <= `ALU_SLT;
+                        MemRead <= 1'b0;
+                        MemWrite <= 1'b0;
+                        PCSrc <= 1'b0; // Not Branch 
+                        ALUSrc_A <= 2'b00; //RD1
+                        ALUSrc_B <= 2'b00; //RD2
+                        JumpSrc <= 1'b1; // PC = GPR[rs]
                     end
                 endcase
-            end
-            `Branch_Completion:
-            begin
-                ALUSrc_A <= 2'b00; //RegA rs
-                ALUSrc_B <= 2'b00;  // RegB or nothing此处bgtz等直接与0做比较
-                PCSrc <= 2'b01; //BranchTarget
-                PCWriteCond <= 1'b1;
-                state <= `Instruction_Fetch;
-                case(OP)
-                    `OP_beq:
-                        begin
-                            ALUOp <= `ALU_SUB;
-                        end
-                    `OP_bgez_bltz:
-                        begin
-                            case(Rt)
-                                5'b00000: //bltz
-                                begin
-                                    ALUOp <= `ALU_BLTZ;
-                                end
-                                5'b00001: //bgez
-                                begin
-                                    ALUOp <= `ALU_BGEZ;
-                                end
-                            endcase
-                        end
-                    `OP_bgtz:
-                        begin
-                            ALUOp <= `ALU_BGTZ;
-                        end
-                    `OP_blez:
-                        begin
-                            ALUOp <= `ALU_BLEZ;
-                        end
-                    `OP_bne:
-                        begin
-                            ALUOp <= `ALU_BNE;
-                        end
-                endcase
-            end
-            `Jump_Completion:
-            begin
-                PCWrite <= 1'b1;
-                state <= `Instruction_Fetch;
-                case(OP)
-                    `OP_j:
-                        begin
-                            PCSrc <= 2'b10; //PC[31:28] +  <<2 + 00
-                            RegWrite <= 1'b0;
-				            PCWriteCond <= 1'b0;
-				            MemWrite <= 1'b0;
-				            IRWrite <= 1'b0;
-                        end
-                    `OP_jal:
-                        begin
-                            PCSrc <= 2'b10; //PC[31:28] +  <<2 + 00
-                            RegWrite <= 1'b1; //Write PC+4 to No.31
-                            RegDst <= 2'b10; //No.31 Reg
-                            MemtoReg <= 2'b10; //PC+4;
-				            PCWriteCond <= 1'b0;
-				            MemWrite <= 1'b0;
-				            IRWrite <= 1'b0;
-                        end
-                    `OP_Rtype:
-                        begin
-                            case(Funct)
-                            `funct_jalr:
-                                begin
-                                    PCSrc <= 2'b11; //RegA_o
-                                    RegWrite <= 1'b1; //Write PC+4 to No.31
-                                    RegDst <= 2'b10; //No.31 Reg
-                                    MemtoReg <= 2'b10; //PC+4;
-				                    PCWriteCond <= 1'b0;
-				                    MemWrite <= 1'b0;
-				                    IRWrite <= 1'b0;
-                                end
-                            `funct_jr:
-                                begin
-                                    PCSrc <= 2'b11; //RegA_o
-                                    RegWrite <= 1'b0;
-				                    PCWriteCond <= 1'b0;
-				                    MemWrite <= 1'b0;
-				                    IRWrite <= 1'b0;
-                                end
-                            endcase
-                        end
-                endcase
-            end //endJmp
-            `MemRead_Completion:
-            begin
-                RegDst <= 2'b00; //rt
-                RegWrite <= 1'b1;
-                MemtoReg <= 2'b00; //MemData_o
-                PCWrite <= 1'b0;
-                PCWriteCond <= 1'b0;
-                MemWrite <= 1'b0;
-                IRWrite <= 1'b0;
-                state <= `Instruction_Fetch;
-            end
-        endcase    //endstate
-    end//endalways
+            end //Rtype jalr jr
+        //-----------R-i type--------------
+        `OP_addi:
+        begin
+            $display("Control addi");
+            RegDst <= 2'b00 //Rt
+            RegWrite <= 1'b1;
+            MemtoReg <= 2'b00; //ALUResult
+            MemWrite <= 1'b0;
+            MemRead <= 1'b0;
+            PCSrc <= 1'b0;
+            ALUSrc_A <= 2'b00 ; //RD1
+            ALUSrc_B <= 2'b01 ; // SignExtend
+            NPCType <= 2'b00 ; // PC+4
+            ALUOp <= `ALU_ADD;
+        end
+        `OP_addiu:
+        begin
+            $display("Control addiu");
+            RegDst <= 2'b00 //Rt
+            RegWrite <= 1'b1;
+            MemtoReg <= 2'b00; //ALUResult
+            MemWrite <= 1'b0;
+            MemRead <= 1'b0;
+            PCSrc <= 1'b0;
+            ALUSrc_A <= 2'b00 ; //RD1
+            ALUSrc_B <= 2'b01 ; // SignExtend
+            NPCType <= 2'b00 ; // PC+4
+            ALUOp <= `ALU_ADD;
+        end
+        `OP_andi:
+        begin
+            $display("Control andi");
+            RegDst <= 2'b00 //Rt
+            RegWrite <= 1'b1;
+            MemtoReg <= 2'b00; //ALUResult
+            MemWrite <= 1'b0;
+            MemRead <= 1'b0;
+            PCSrc <= 1'b0;
+            ALUSrc_A <= 2'b00 ; //RD1
+            ALUSrc_B <= 2'b01 ; // SignExtend
+            NPCType <= 2'b00 ; // PC+4
+            ALUOp <= `ALU_ANDI;
+        end
+        `OP_ori:
+        begin
+            $display("Control ori");
+            RegDst <= 2'b00 //Rt
+            RegWrite <= 1'b1;
+            MemtoReg <= 2'b00; //ALUResult
+            MemWrite <= 1'b0;
+            MemRead <= 1'b0;
+            PCSrc <= 1'b0;
+            ALUSrc_A <= 2'b00 ; //RD1
+            ALUSrc_B <= 2'b01 ; // SignExtend
+            NPCType <= 2'b00 ; // PC+4
+            ALUOp <= `ALU_ORI;
+        end
+        `OP_xori:
+        begin
+            $display("Control xori");
+            RegDst <= 2'b00 //Rt
+            RegWrite <= 1'b1;
+            MemtoReg <= 2'b00; //ALUResult
+            MemWrite <= 1'b0;
+            MemRead <= 1'b0;
+            PCSrc <= 1'b0;
+            ALUSrc_A <= 2'b00 ; //RD1
+            ALUSrc_B <= 2'b01 ; // SignExtend
+            NPCType <= 2'b00 ; // PC+4
+            ALUOp <= `ALU_XORI;
+        end
+        `OP_lui:
+        begin
+            $display("Control lui");
+            RegDst <= 2'b00 //Rt
+            RegWrite <= 1'b1;
+            MemtoReg <= 2'b00; //ALUResult
+            MemWrite <= 1'b0;
+            MemRead <= 1'b0;
+            PCSrc <= 1'b0;
+            ALUSrc_A <= 2'b00 ; //RD1 随意值
+            ALUSrc_B <= 2'b01 ; // SignExtend
+            NPCType <= 2'b00 ; // PC+4
+            ALUOp <= `ALU_XORI;
+        end
+        `OP_slti:
+        begin
+            $display("Control slti");
+            RegDst <= 2'b00 //Rt
+            RegWrite <= 1'b1;
+            MemtoReg <= 2'b00; //ALUResult
+            MemWrite <= 1'b0;
+            MemRead <= 1'b0;
+            PCSrc <= 1'b0;
+            ALUSrc_A <= 2'b00 ; //RD1
+            ALUSrc_B <= 2'b01 ; // SignExtend
+            NPCType <= 2'b00 ; // PC+4
+            ALUOp <= `ALU_SLT;
+        end
+        `OP_sltiu:
+        begin
+            $display("Control sltiu");
+            RegDst <= 2'b00 //Rt
+            RegWrite <= 1'b1;
+            MemtoReg <= 2'b00; //ALUResult
+            MemWrite <= 1'b0;
+            MemRead <= 1'b0;
+            PCSrc <= 1'b0;
+            ALUSrc_A <= 2'b00 ; //RD1
+            ALUSrc_B <= 2'b01 ; // SignExtend
+            NPCType <= 2'b00 ; // PC+4
+            ALUOp <= `ALU_SLTU;
+        end
+        //------load--------
+        `OP_lw:
+        begin
+            $display("Control LW");
+            RegDst <= 2'b00 //Rt
+            RegWrite <= 1'b1;
+            MemtoReg <= 2'b01; //DataMemory 
+            MemWrite <= 1'b0;
+            MemRead <= 1'b1;
+            MemRBits <= `MemR_lw; //Read Type
+            PCSrc <= 1'b0; //PC+4
+            ALUSrc_A <= 2'b00 ; //RD1
+            ALUSrc_B <= 2'b01 ; // SignExtend
+            NPCType <= 2'b00 ; // PC+4
+            ALUOp <= `ALU_ADD; //计算地址
+        end
+        `OP_lb:
+        begin
+            $display("Control LB");
+            RegDst <= 2'b00 //Rt
+            RegWrite <= 1'b1;
+            MemtoReg <= 2'b01; //DataMemory 
+            MemWrite <= 1'b0;
+            MemRead <= 1'b1;
+            MemRBits <= `MemR_lb; //Read Type
+            PCSrc <= 1'b0; //PC+4
+            ALUSrc_A <= 2'b00 ; //RD1
+            ALUSrc_B <= 2'b01 ; // SignExtend
+            NPCType <= 2'b00 ; // PC+4
+            ALUOp <= `ALU_ADD; //计算地址
+        end
+        `OP_lbu:
+        begin
+            $display("Control LBU");
+            RegDst <= 2'b00 //Rt
+            RegWrite <= 1'b1;
+            MemtoReg <= 2'b01; //DataMemory 
+            MemWrite <= 1'b0;
+            MemRead <= 1'b1;
+            MemRBits <= `MemR_lbu; //Read Type
+            PCSrc <= 1'b0; //PC+4
+            ALUSrc_A <= 2'b00 ; //RD1
+            ALUSrc_B <= 2'b01 ; // SignExtend
+            NPCType <= 2'b00 ; // PC+4
+            ALUOp <= `ALU_ADD; //计算地址
+        end
+        `OP_lh:
+        begin
+            $display("Control LH");
+            RegDst <= 2'b00 //Rt
+            RegWrite <= 1'b1;
+            MemtoReg <= 2'b01; //DataMemory 
+            MemWrite <= 1'b0;
+            MemRead <= 1'b1;
+            MemRBits <= `MemR_lh; //Read Type
+            PCSrc <= 1'b0; //PC+4
+            ALUSrc_A <= 2'b00 ; //RD1
+            ALUSrc_B <= 2'b01 ; // SignExtend
+            NPCType <= 2'b00 ; // PC+4
+            ALUOp <= `ALU_ADD; //计算地址
+        end
+        `OP_lhu:
+        begin
+            $display("Control LHU");
+            RegDst <= 2'b00 //Rt
+            RegWrite <= 1'b1;
+            MemtoReg <= 2'b01; //DataMemory 
+            MemWrite <= 1'b0;
+            MemRead <= 1'b1;
+            MemRBits <= `MemR_lhu; //Read Type
+            PCSrc <= 1'b0; //PC+4
+            ALUSrc_A <= 2'b00 ; //RD1
+            ALUSrc_B <= 2'b01 ; // SignExtend
+            NPCType <= 2'b00 ; // PC+4
+            ALUOp <= `ALU_ADD; //计算地址
+        end
+        //-------------store type----------------
+        `OP_sw:
+        begin
+            $display("Control SW");
+            RegWrite <= 1'b0;
+            MemWrite <= 1'b1;
+            MemRead <= 1'b0;
+            MemWrBits <= `MemWr_sw; //Write Type
+            PCSrc <= 1'b0; //PC+4
+            ALUSrc_A <= 2'b00 ; //RD1
+            ALUSrc_B <= 2'b01 ; // SignExtend
+            NPCType <= 2'b00 ; // PC+4
+            ALUOp <= `ALU_ADD; //计算地址
+        end
+        `OP_sh:
+        begin
+            $display("Control SH");
+            RegWrite <= 1'b0;
+            MemWrite <= 1'b1;
+            MemRead <= 1'b0;
+            MemWrBits <= `MemWr_sh; //Write Type
+            PCSrc <= 1'b0; //PC+4
+            ALUSrc_A <= 2'b00 ; //RD1
+            ALUSrc_B <= 2'b01 ; // SignExtend
+            NPCType <= 2'b00 ; // PC+4
+            ALUOp <= `ALU_ADD; //计算地址
+        end
+        `OP_sb:
+        begin
+            $display("Control SB");
+            RegWrite <= 1'b0;
+            MemWrite <= 1'b1;
+            MemRead <= 1'b0;
+            MemWrBits <= `MemWr_sb; //Write Type
+            PCSrc <= 1'b0; //PC+4
+            ALUSrc_A <= 2'b00 ; //RD1
+            ALUSrc_B <= 2'b01 ; // SignExtend
+            NPCType <= 2'b00 ; // PC+4
+            ALUOp <= `ALU_ADD; //计算地址
+        end
+        //---------------------Branch-----------------------
+        `OP_beq:
+        begin
+            $display("Control beq");
+            RegWrite <= 1'b0;
+            MemWrite <= 1'b0;
+            MemRead <= 1'b0;
+            PCSrc <= 1'b1; //Branch
+            ALUSrc_A <= 2'b00 ; //RD1 
+            ALUSrc_B <= 2'b00 ; //RD2
+            NPCType <= 2'b01 ; // Branch 给EX级的 BranchUnit
+            ALUOp <= `ALU_SUB ; //BEQ
+        end
+        `OP_blez:
+        begin
+            $display("Control blez");
+            RegWrite <= 1'b0;
+            MemWrite <= 1'b0;
+            MemRead <= 1'b0;
+            PCSrc <= 1'b1; //Branch
+            ALUSrc_A <= 2'b00 ; //RD1 
+            ALUSrc_B <= 2'b00 ; //RD2
+            NPCType <= 2'b01 ; // Branch 给EX级的 BranchUnit
+            ALUOp <= `ALU_BLEZ ; //blez
+        end
+        `OP_bgtz:
+        begin
+            $display("Control bgtz");
+            RegWrite <= 1'b0;
+            MemWrite <= 1'b0;
+            MemRead <= 1'b0;
+            PCSrc <= 1'b1; //Branch
+            ALUSrc_A <= 2'b00 ; //RD1 
+            ALUSrc_B <= 2'b00 ; //RD2
+            NPCType <= 2'b01 ; // Branch 给EX级的 BranchUnit
+            ALUOp <= `ALU_BGTZ ; //BGTZ
+        end
+        `OP_bne:
+        begin
+            $display("Control bne");
+            RegWrite <= 1'b0;
+            MemWrite <= 1'b0;
+            MemRead <= 1'b0;
+            PCSrc <= 1'b1; //Branch
+            ALUSrc_A <= 2'b00 ; //RD1 
+            ALUSrc_B <= 2'b00 ; //RD2
+            NPCType <= 2'b01 ; // Branch 给EX级的 BranchUnit
+            ALUOp <= `ALU_BNE; //BGTZ
+        end
+        `OP_bgez_bltz:
+        begin
+            case(Rt)
+                5'b00000: //bltz
+                begin
+                    $display("Control bltz");
+                    RegWrite <= 1'b0;
+                    MemWrite <= 1'b0;
+                    MemRead <= 1'b0;
+                    PCSrc <= 1'b1; //Branch
+                    ALUSrc_A <= 2'b00 ; //RD1 
+                    ALUSrc_B <= 2'b00 ; //RD2
+                    NPCType <= 2'b01 ; // Branch 给EX级的 BranchUnit
+                    ALUOp <= `ALU_BLTZ ; 
+                end
+                5'b00001: //bgez
+                begin
+                    $display("Control bgez");
+                    RegWrite <= 1'b0;
+                    MemWrite <= 1'b0;
+                    MemRead <= 1'b0;
+                    PCSrc <= 1'b1; //Branch
+                    ALUSrc_A <= 2'b00 ; //RD1 
+                    ALUSrc_B <= 2'b00 ; //RD2
+                    NPCType <= 2'b01 ; // Branch 给EX级的 BranchUnit
+                    ALUOp <= `ALU_BGEZ ; 
+                end
+            endcase
+        end
+        //-----------------------Jump--------------------
+        `OP_j:
+        begin
+            RegWrite <= 1'b0;
+            MemWrite <= 1'b0;
+            MemRead <= 1'b0;
+            PCSrc <= 1'b0; //Not Branch
+            ALUSrc_A <= 2'b00 ; //RD1 
+            ALUSrc_B <= 2'b00 ; //RD2
+            NPCType <= 2'b10 ; // Jump
+            ALUOp <= `ALU_NOP ;  //无所谓，从Jump计算元件中得出Jump地址
+            JumpSrc <= 1'b0; // PC[31:28] + <<2 + 00
+        end
+        `OP_jal:
+        begin
+            RegWrite <= 1'b1;
+            RegDst <= 2'b10 ; //No.31
+            MemtoReg <= 2'b10; //PC + 4
+            MemWrite <= 1'b0;
+            MemRead <= 1'b0;
+            PCSrc <= 1'b0; //Not Branch
+            ALUSrc_A <= 2'b00 ; //RD1 
+            ALUSrc_B <= 2'b00 ; //RD2
+            NPCType <= 2'b10 ; // Jump
+            ALUOp <= `ALU_NOP ;  //无所谓，从Jump计算元件中得出Jump地址
+            JumpSrc <= 1'b0 ; // PC[31:28] + <<2 + 00
+        end
+        endcase
+    end
 endmodule

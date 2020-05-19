@@ -84,10 +84,10 @@ module MIPS(clk,rst);
     BranchAdd BranchAdd(.PCPlus4(IFIDPCPlus4),.SignEXTOffset(SignEXTOffset),.BranchPC(BranchPC));
 
     //Control
-    wire MemR;
+    wire MemRead;
     wire [1:0] MemtoReg;
     wire [4:0] ALUOp;
-    wire MemWr;
+    wire MemWrite;
     wire [1:0] Sig_ALUSrcA;
     wire [1:0] Sig_ALUSrcB;
     wire [1:0] MemWrBits;
@@ -98,8 +98,8 @@ module MIPS(clk,rst);
     Control Control(.clk(clk),.rst(rst),.Op(IFIDInstruction[31:26])
     ,.Funct(IFIDInstruction[5:0]),.Rs(IFIDInstruction[25:21]),.Rt(IFIDInstruction[20:16]),
     .PCSrc(PCSrc2),.NPCType(NPCType),.JumpSrc(JumpSrc),
-    .RegDst(RegDst),.MemRead(MemR),.MemtoReg(MemtoReg),.ALUOp(ALUOp),
-    .MemWrite(MemWr),.ALUSrc_A(Sig_ALUSrcA),.ALUSrc_B(Sig_ALUSrcB),
+    .RegDst(RegDst),.MemRead(MemRead),.MemtoReg(MemtoReg),.ALUOp(ALUOp),
+    .MemWrite(MemWrite),.ALUSrc_A(Sig_ALUSrcA),.ALUSrc_B(Sig_ALUSrcB),
     .RegWrite(RegWrite),.MemWrBits(MemWrBits),.MemRBits(MemRBits));
 
 
@@ -223,10 +223,14 @@ module MIPS(clk,rst);
 
     //-------------------MEM Stage-------------------------------
 
+    //ForwardC
+    wire [31:0] EXMEMMemWriteDataFinal;
+    mux2 MUX_ForwardC(.d0(EXMEMMemWriteData),.d1(WriteDataFinal),.s(ForwardC),.y(EXMEMMemWriteDataFinal));
+
     //DataMemory
     wire [31:0] EXMEMMemReadData;
     DM DM(.clk(clk),.MemR(EXMEMMemRead),.MemWr(EXMEMMemWrite),.MemWrBits(EXMEMMemWrBits),.MemRBits(EXMEMMemRBits)
-    ,.addr(EXMEMALUResult),.data(EXMEMMemWriteData),.ReadData(EXMEMMemReadData));
+    ,.addr(EXMEMALUResult),.data(EXMEMMemWriteDataFinal),.ReadData(EXMEMMemReadData));
 
     //MEMWBReg
     wire MEMWBStall;

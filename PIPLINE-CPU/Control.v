@@ -394,7 +394,7 @@ module Control(clk,rst,Op,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
             ALUSrc_A <= 2'b00 ; //RD1 随意值
             ALUSrc_B <= 2'b01 ; // SignExtend
             NPCType <= 2'b00 ; // PC+4
-            ALUOp <= `ALU_XORI;
+            ALUOp <= `ALU_LUI;
         end
         `OP_slti:
         begin

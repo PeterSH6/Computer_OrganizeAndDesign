@@ -1,8 +1,9 @@
+`include "ctrl_encode_def.v"
 module Branch_Jump_Detect(
     input [1:0] NPCType,
     input Zero,
-    output [1:0] NextType;
-)
+    output reg [1:0] NextType
+);
 
 always@(*)
 begin

@@ -1,8 +1,8 @@
 `include "ctrl_encode_def.v"
-module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc_A,ALUSrc_B,RegWrite,MemWrBits,MemRBits,JumpSrc);
+module Control(clk,rst,Op,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUOp,MemWrite,ALUSrc_A,ALUSrc_B,RegWrite,MemWrBits,MemRBits,JumpSrc);
     input clk;
     input rst;
-    input [5:0] OP;
+    input [5:0] Op;
     input [4:0] Rs;//Instr[25:21]
     input [4:0] Rt; //Instr[20:16]
     input [5:0] Funct;
@@ -20,7 +20,7 @@ module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
 
     initial 
     begin
-        MemRead,MemWrite,RegWrite <= 3'b0;
+        {MemRead,MemWrite,RegWrite} <= 3'b0;
         NPCType <= 2'b00;
         ALUOp <= 4'b0;
         MemRBits <= 3'b0;
@@ -300,7 +300,7 @@ module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
         `OP_addi:
         begin
             $display("Control addi");
-            RegDst <= 2'b00 //Rt
+            RegDst <= 2'b00; //Rt
             RegWrite <= 1'b1;
             MemtoReg <= 2'b00; //ALUResult
             MemWrite <= 1'b0;
@@ -314,7 +314,7 @@ module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
         `OP_addiu:
         begin
             $display("Control addiu");
-            RegDst <= 2'b00 //Rt
+            RegDst <= 2'b00; //Rt
             RegWrite <= 1'b1;
             MemtoReg <= 2'b00; //ALUResult
             MemWrite <= 1'b0;
@@ -328,7 +328,7 @@ module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
         `OP_andi:
         begin
             $display("Control andi");
-            RegDst <= 2'b00 //Rt
+            RegDst <= 2'b00; //Rt
             RegWrite <= 1'b1;
             MemtoReg <= 2'b00; //ALUResult
             MemWrite <= 1'b0;
@@ -342,7 +342,7 @@ module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
         `OP_ori:
         begin
             $display("Control ori");
-            RegDst <= 2'b00 //Rt
+            RegDst <= 2'b00; //Rt
             RegWrite <= 1'b1;
             MemtoReg <= 2'b00; //ALUResult
             MemWrite <= 1'b0;
@@ -356,7 +356,7 @@ module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
         `OP_xori:
         begin
             $display("Control xori");
-            RegDst <= 2'b00 //Rt
+            RegDst <= 2'b00 ;//Rt
             RegWrite <= 1'b1;
             MemtoReg <= 2'b00; //ALUResult
             MemWrite <= 1'b0;
@@ -370,7 +370,7 @@ module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
         `OP_lui:
         begin
             $display("Control lui");
-            RegDst <= 2'b00 //Rt
+            RegDst <= 2'b00; //Rt
             RegWrite <= 1'b1;
             MemtoReg <= 2'b00; //ALUResult
             MemWrite <= 1'b0;
@@ -384,7 +384,7 @@ module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
         `OP_slti:
         begin
             $display("Control slti");
-            RegDst <= 2'b00 //Rt
+            RegDst <= 2'b00 ;//Rt
             RegWrite <= 1'b1;
             MemtoReg <= 2'b00; //ALUResult
             MemWrite <= 1'b0;
@@ -398,7 +398,7 @@ module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
         `OP_sltiu:
         begin
             $display("Control sltiu");
-            RegDst <= 2'b00 //Rt
+            RegDst <= 2'b00; //Rt
             RegWrite <= 1'b1;
             MemtoReg <= 2'b00; //ALUResult
             MemWrite <= 1'b0;
@@ -413,7 +413,7 @@ module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
         `OP_lw:
         begin
             $display("Control LW");
-            RegDst <= 2'b00 //Rt
+            RegDst <= 2'b00; //Rt
             RegWrite <= 1'b1;
             MemtoReg <= 2'b01; //DataMemory 
             MemWrite <= 1'b0;
@@ -428,7 +428,7 @@ module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
         `OP_lb:
         begin
             $display("Control LB");
-            RegDst <= 2'b00 //Rt
+            RegDst <= 2'b00; //Rt
             RegWrite <= 1'b1;
             MemtoReg <= 2'b01; //DataMemory 
             MemWrite <= 1'b0;
@@ -443,7 +443,7 @@ module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
         `OP_lbu:
         begin
             $display("Control LBU");
-            RegDst <= 2'b00 //Rt
+            RegDst <= 2'b00; //Rt
             RegWrite <= 1'b1;
             MemtoReg <= 2'b01; //DataMemory 
             MemWrite <= 1'b0;
@@ -458,7 +458,7 @@ module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
         `OP_lh:
         begin
             $display("Control LH");
-            RegDst <= 2'b00 //Rt
+            RegDst <= 2'b00;//Rt
             RegWrite <= 1'b1;
             MemtoReg <= 2'b01; //DataMemory 
             MemWrite <= 1'b0;
@@ -473,7 +473,7 @@ module Control(clk,rst,OP,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
         `OP_lhu:
         begin
             $display("Control LHU");
-            RegDst <= 2'b00 //Rt
+            RegDst <= 2'b00; //Rt
             RegWrite <= 1'b1;
             MemtoReg <= 2'b01; //DataMemory 
             MemWrite <= 1'b0;

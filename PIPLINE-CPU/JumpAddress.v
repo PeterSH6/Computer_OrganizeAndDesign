@@ -3,8 +3,8 @@ module JumpAddress(
     input [31:0] IDEXInstruction,
     input [31:0] GPR_RS,
     input IDEXJumpSrc,
-    output [31:0] JumpPC
-)
+    output reg [31:0] JumpPC
+);
 
 always @(*)
 begin

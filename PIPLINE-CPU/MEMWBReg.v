@@ -17,7 +17,7 @@ module MEMWBReg(
     output reg MEMWBRegWrite,
     input [1:0] EXMEMMemtoReg,
     output reg [1:0] MEMWBMemtoReg
-)
+);
 
 initial
     begin

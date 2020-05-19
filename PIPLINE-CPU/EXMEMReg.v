@@ -25,7 +25,7 @@ module EXMEMReg(
     output reg [1:0] EXMEMMemRBits,
     input [1:0] IDEXMemtoReg,
     output reg [1:0] EXMEMMemtoReg
-    )
+    );
 
 initial
     begin

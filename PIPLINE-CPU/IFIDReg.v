@@ -1,4 +1,4 @@
-module IFIDReg(clk,rst,IFIDStall,IFIDFlush,PCPlus4_i,PCPlus4_o,Instruction_i,IFIDInstruction)
+module IFIDReg(clk,rst,IFIDStall,IFIDFlush,PCPlus4_i,PCPlus4_o,Instruction_i,IFIDInstruction);
     input clk;
     input rst;
     input IFIDStall;

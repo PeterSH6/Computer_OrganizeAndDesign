@@ -1,3 +1,4 @@
+`include "ctrl_encode_def.v"
 module Hazard_Detect(
     input [1:0] Nexttype,//从EX级中的Branch检测单元检测出是否预测正确或者是否为Jump
     input IDEXMEMRead,
@@ -9,7 +10,7 @@ module Hazard_Detect(
     output reg [1:0] PCSrc, //第一个MUX,用于选择PC+4，Jump，IDEXPC+4
     output reg PCWrite,
     output reg IDEXFlush
-)
+);
 
 always @(*)
     begin

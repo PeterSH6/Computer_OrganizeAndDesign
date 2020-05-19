@@ -1,4 +1,4 @@
-module(
+module IDEXReg(
     input clk,
     input rst,
     input IDEXStall,
@@ -37,7 +37,7 @@ module(
     output reg [1:0] IDEXALUSrc_B,
     input JumpSrc,
     output reg IDEXJumpSrc    
-)
+);
 
 initial
 begin

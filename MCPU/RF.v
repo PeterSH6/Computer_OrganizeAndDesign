@@ -34,3 +34,4 @@
   assign reg_data = (reg_sel != 0) ? rf[reg_sel] : 0; 
 
 endmodule 
+

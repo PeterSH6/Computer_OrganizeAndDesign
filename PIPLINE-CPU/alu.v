@@ -34,8 +34,6 @@ module alu(A,B,ALUOp,C,Zero);
           `ALU_BLEZ: C = (A <= 0) ? 32'd0 : 32'd1;
           `ALU_BLTZ: C = (A < 0) ? 32'd0 : 32'd1;
           `ALU_BNE:  C = (A != B) ? 32'd0 : 32'd1;
-
-          //TODOJUMP
           default:   C = A;                          // Undefined
       endcase
    end // end always

@@ -173,9 +173,12 @@ module MIPS(clk,rst);
     //ForwardUnit
     wire EXMEMRegWrite;
     wire [4:0] EXMEMRegRd;
+    wire ForwardC;
+    wire MEMWBMemRead;
+    wire EXMEMMemWrite;
     ForwardUnit ForwardUnit(.EXMEMRegWrite(EXMEMRegWrite),.EXMEMRegRd(EXMEMRegRd),.IDEXRegRs(IDEXInstruction[25:21])
     ,.IDEXRegRt(IDEXInstruction[20:16]),.MEMWBRegWrite(MEMWBRegWrite),.MEMWBRegRd(MEMWBRegRd)
-    ,.ForwardA(ForwardA),.ForwardB(ForwardB));
+    ,.ForwardA(ForwardA),.ForwardB(ForwardB),.ForwardC(ForwardC),.MEMWBMemRead(MEMWBMemRead),.EXMEMMemWrite(EXMEMMemWrite));
 
     //EXMEMReg
     wire EXMEMStall;
@@ -185,7 +188,6 @@ module MIPS(clk,rst);
     wire [31:0] EXMEMInstruction;
     wire [31:0] EXMEMPCPlus4;
     wire [31:0] EXMEMMemWriteData;
-    wire EXMEMMemWrite;
     wire [1:0] EXMEMMemWrBits;
     wire EXMEMMemRead;
     wire [2:0] EXMEMMemRBits;
@@ -239,7 +241,8 @@ module MIPS(clk,rst);
     MEMWBReg MEMWBReg(.clk(clk),.rst(rst),.MEMWBStall(MEMWBStall),.MEMWBFlush(MEMWBFlush),.EXMEMInstruction(EXMEMInstruction)
     ,.MEMWBInstruction(MEMWBInstruction),.EXMEMPCPlus4(EXMEMPCPlus4),.MEMWBPCPlus4(MEMWBPCPlus4),.EXMEMALUResult(EXMEMALUResult)
     ,.MEMWBALUResult(MEMWBALUResult),.MemoryData(EXMEMMemReadData),.MEMWBMemoryData(MEMWBMemoryData),.EXMEMRegRd(EXMEMRegRd)
-    ,.MEMWBRegRd(MEMWBRegRd),.EXMEMRegWrite(EXMEMRegWrite),.MEMWBRegWrite(MEMWBRegWrite),.EXMEMMemtoReg(EXMEMMemtoReg),.MEMWBMemtoReg(MEMWBMemtoReg));
+    ,.MEMWBRegRd(MEMWBRegRd),.EXMEMRegWrite(EXMEMRegWrite),.MEMWBRegWrite(MEMWBRegWrite),.EXMEMMemtoReg(EXMEMMemtoReg),.MEMWBMemtoReg(MEMWBMemtoReg)
+    ,.EXMEMMemRead(EXMEMMemRead),.MEMWBMemRead(MEMWBMemRead));
 
     //--------------------------WB Stage---------------------------------
 

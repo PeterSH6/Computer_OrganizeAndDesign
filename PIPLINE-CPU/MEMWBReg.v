@@ -16,7 +16,9 @@ module MEMWBReg(
     input EXMEMRegWrite,
     output reg MEMWBRegWrite,
     input [1:0] EXMEMMemtoReg,
-    output reg [1:0] MEMWBMemtoReg
+    output reg [1:0] MEMWBMemtoReg,
+    input EXMEMMemRead,
+    output reg MEMWBMemRead
 );
 
 initial
@@ -28,6 +30,7 @@ initial
         MEMWBRegRd  <= 5'b0;
         MEMWBRegWrite  <= 1'b0;
         MEMWBMemtoReg  <= 2'b0;
+        MEMWBMemRead <= 1'b0;
     end
 
 always @(posedge clk)
@@ -41,6 +44,7 @@ always @(posedge clk)
         MEMWBRegRd  <= 5'b0;
         MEMWBRegWrite  <= 1'b0;
         MEMWBMemtoReg  <= 2'b0;
+        MEMWBMemRead <= 1'b0;
         end
         else if(!MEMWBStall)
         begin
@@ -53,6 +57,7 @@ always @(posedge clk)
                     MEMWBRegRd  <= 5'b0;
                     MEMWBRegWrite  <= 1'b0;
                     MEMWBMemtoReg  <= 2'b0;
+                    MEMWBMemRead <= 1'b0;
                 end
             else
                 begin
@@ -63,6 +68,7 @@ always @(posedge clk)
                     MEMWBRegRd <= EXMEMRegRd;
                     MEMWBRegWrite <= EXMEMRegWrite;
                     MEMWBMemtoReg <= EXMEMMemtoReg;
+                    MEMWBMemRead <= EXMEMMemRead;
                 end
         end
     end

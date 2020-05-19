@@ -14,7 +14,7 @@ module IDEXReg(
     input [31:0] Instruction,
     output reg [31:0] IDEXInstruction,
     input [4:0] WriteBackDst,//根据选择器所选择的Rd，Rt，31来存储
-    output reg [4:0] IDEXWriteBackDst,
+    output reg [4:0] IDEXRegRd,
     input RegWrite,
     output reg IDEXRegWrite,
     input [4:0] ALUOp,
@@ -57,7 +57,7 @@ begin
     IDEXJumpSrc <= 1'b0;
     IDEXInstruction <= 32'b0;
     IDEXALUOp <= 5'b0;
-    IDEXWriteBackDst  <= 5'b0;
+    IDEXRegRd  <= 5'b0;
 end
 
 always @(negedge clk)
@@ -80,7 +80,7 @@ begin
         IDEXJumpSrc <= 1'b0;
         IDEXInstruction <= 32'b0;
         IDEXALUOp <= 5'b0;
-        IDEXWriteBackDst  <= 5'b0;
+        IDEXRegRd  <= 5'b0;
     end
     else if(!IDEXStall)
     begin
@@ -102,7 +102,7 @@ begin
             IDEXJumpSrc <= 1'b0;
             IDEXInstruction <= 32'b0;
             IDEXALUOp <= 5'b0;
-            IDEXWriteBackDst  <= 5'b0;
+            IDEXRegRd  <= 5'b0;
         end
         else
         begin
@@ -122,7 +122,7 @@ begin
             IDEXJumpSrc <= JumpSrc;
             IDEXInstruction <= Instruction;
             IDEXALUOp <= ALUOp;
-            IDEXWriteBackDst  <= WriteBackDst;
+            IDEXRegRd  <= WriteBackDst;
         end
     end
 end

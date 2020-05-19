@@ -106,7 +106,7 @@ module MIPS(clk,rst);
     //Hazard Detect
     wire [1:0] NextType;//从BranchJump检测unit中检测
     wire [31:0] IDEXIntruction;
-    Hazard_Detect Hazard_Detect(.NextType(NextType),.IDEXMEMRead(MemR),.IDEXRt(IDEXIntruction[20:16])
+    Hazard_Detect Hazard_Detect(.Nexttype(NextType),.IDEXMEMRead(MemR),.IDEXRt(IDEXIntruction[20:16])
     ,.IFIDRs(IFIDInstruction[25:21]),.IFIDRt(IFIDInstruction[20:16]),.IFIDStall(IFIDStall),.IFIDFlush(IFIDFlush)
     ,.PCSrc(PCSrc1),.PCWrite(PCWrite),.IDEXFlush(IDEXFlush));
 

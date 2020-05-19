@@ -12,6 +12,15 @@ module Hazard_Detect(
     output reg IDEXFlush
 );
 
+initial
+begin
+    IFIDStall <= 1'b0;
+    IFIDFlush <= 1'b0;
+    PCSrc <= 2'b00; //PC+4
+    PCWrite <= 1'b1; //刚开始时必须为1
+    IDEXFlush <= 1'b0;
+end
+
 always @(*)
     begin
         if(IDEXMEMRead && ((IDEXRt == IFIDRs) || (IDEXRt == IFIDRt))) //load hazard

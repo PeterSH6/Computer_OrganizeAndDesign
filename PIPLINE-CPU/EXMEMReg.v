@@ -17,12 +17,12 @@ module EXMEMReg(
     output reg EXMEMRegWrite,
     input IDEXMemWrite,
     output reg EXMEMMemWrite,
-    input [2:0] IDEXMemWrBits,
-    output reg [2:0] EXMEMMemWrBits,
+    input [1:0] IDEXMemWrBits,
+    output reg [1:0] EXMEMMemWrBits,
     input IDEXMemRead,
     output reg EXMEMMemRead,
-    input [1:0] IDEXMemRBits,
-    output reg [1:0] EXMEMMemRBits,
+    input [2:0] IDEXMemRBits,
+    output reg [2:0] EXMEMMemRBits,
     input [1:0] IDEXMemtoReg,
     output reg [1:0] EXMEMMemtoReg
     );
@@ -34,10 +34,10 @@ initial
         EXMEMPCPlus4 <= 32'b0;
         EXMEMMemWriteData <= 32'b0;
         EXMEMMemWrite<= 1'b0;
-        EXMEMMemWrBits<= 3'b0;
+        EXMEMMemWrBits<= 2'b0;
         EXMEMMemtoReg<= 2'b0;
         EXMEMMemRead<= 1'b0;
-        EXMEMMemRBits<= 2'b0;
+        EXMEMMemRBits<= 3'b0;
         EXMEMInstruction<= 32'b0;
         EXMEMALUResult<= 32'b0;
     end
@@ -51,10 +51,10 @@ always @(negedge clk)
         EXMEMPCPlus4 <= 32'b0;
         EXMEMMemWriteData <= 32'b0;
         EXMEMMemWrite<= 1'b0;
-        EXMEMMemWrBits<= 3'b0;
+        EXMEMMemWrBits<= 2'b0;
         EXMEMMemtoReg<= 2'b0;
         EXMEMMemRead<= 1'b0;
-        EXMEMMemRBits<= 2'b0;
+        EXMEMMemRBits<= 3'b0;
         EXMEMInstruction<= 32'b0;
         EXMEMALUResult<= 32'b0;
         end
@@ -67,10 +67,10 @@ always @(negedge clk)
                         EXMEMPCPlus4 <= 32'b0;
                         EXMEMMemWriteData <= 32'b0;
                         EXMEMMemWrite<= 1'b0;
-                        EXMEMMemWrBits<= 3'b0;
+                        EXMEMMemWrBits<= 2'b0;
                         EXMEMMemtoReg<= 2'b0;
                         EXMEMMemRead<= 1'b0;
-                        EXMEMMemRBits<= 2'b0;
+                        EXMEMMemRBits<= 3'b0;
                         EXMEMInstruction<= 32'b0;
                         EXMEMALUResult<= 32'b0;
                     end

@@ -54,7 +54,7 @@ module MIPS(clk,rst);
    wire IFIDFlush;
    wire [31:0] IFIDInstruction;
    wire [31:0] IFIDPCPlus4;
-   IFIDReg IFIDReg(.clk(clk),.rst(rst),.IFIDStall(IFIDStall),.IFIDFlush(IFIDFlush),.PCPlus4_i(PC_o),.Instruction_i(Instruction_i),.PCPlus4_o(IFIDPCPlus4),.IFIDInstruction(IFIDInstruction));
+   IFIDReg IFIDReg(.clk(clk),.rst(rst),.IFIDStall(IFIDStall),.IFIDFlush(IFIDFlush),.PCPlus4_i(PC_o),.Instruction_i(Instruction),.PCPlus4_o(IFIDPCPlus4),.IFIDInstruction(IFIDInstruction));
 
 
 //-------------------------ID Stage-----------------------------
@@ -74,7 +74,7 @@ module MIPS(clk,rst);
     //MUX_RegDst;
     wire [1:0] RegDst;//Control
     wire [4:0] RegDstIn;
-    mux4 MUX_RegDst(.d0(IFIDInstruction[20:16]),.d1(IFIDInstruction[15:11]),.d2(5'b11111),.s(RegDst),.y(RegDstIn));
+    mux4_5 MUX_RegDst(.d0(IFIDInstruction[20:16]),.d1(IFIDInstruction[15:11]),.d2(5'b11111),.s(RegDst),.y(RegDstIn));
 
     //SignExt
     wire [31:0] SignEXTOffset;
@@ -90,17 +90,17 @@ module MIPS(clk,rst);
     wire MemWr;
     wire [1:0] Sig_ALUSrcA;
     wire [1:0] Sig_ALUSrcB;
-    wire IDEXRegWrite; //传到WB后再传回来
-    wire [2:0] MemWrBits;
-    wire [1:0] MemRBits;
+    wire [1:0] MemWrBits;
+    wire [2:0] MemRBits;
     wire [1:0] NPCType;//传给EX中的Branch判断单元来进行判定。
     wire JumpSrc;//用于JumpAddress中选择相应的JumpPC
+    wire RegWrite;
     Control Control(.clk(clk),.rst(rst),.Op(IFIDInstruction[31:26])
     ,.Funct(IFIDInstruction[5:0]),.Rs(IFIDInstruction[25:21]),.Rt(IFIDInstruction[20:16]),
     .PCSrc(PCSrc2),.NPCType(NPCType),.JumpSrc(JumpSrc),
     .RegDst(RegDst),.MemRead(MemR),.MemtoReg(MemtoReg),.ALUOp(ALUOp),
     .MemWrite(MemWr),.ALUSrc_A(Sig_ALUSrcA),.ALUSrc_B(Sig_ALUSrcB),
-    .RegWrite(IDEXRegWrite),.MemWrBits(MemWrBits),.MemRBits(MemRBits));
+    .RegWrite(RegWrite),.MemWrBits(MemWrBits),.MemRBits(MemRBits));
 
 
     //Hazard Detect
@@ -117,7 +117,7 @@ module MIPS(clk,rst);
     wire [31:0] IDEXRD2;
     wire [1:0] IDEXALUSrc_A ;
     wire [1:0] IDEXALUSrc_B;
-    wire IDEXSignEXT;  
+    wire [31:0] IDEXSignEXT;  
     wire [1:0] IDEXNPCType ;
     wire IDEXMemWrite ;
     wire [1:0] IDEXMemWrBits; 
@@ -128,11 +128,13 @@ module MIPS(clk,rst);
     wire [31:0] IDEXInstruction; 
     wire [4:0] IDEXALUOp ;
     wire [4:0] IDEXRegRd ;
+    wire IDEXRegWrite; //传到WB后再传回来
     IDEXReg IDEXReg(.clk(clk),.rst(rst),.IDEXStall(IDEXStall),.IDEXFlush(IDEXFlush),.RD1_i(ReadData1),.IDEXRD1(IDEXRD1),.RD2_i(ReadData2),.IDEXRD2(IDEXRD2)
     ,.PCPlus4_i(IFIDPCPlus4),.IDEXPCPlus4(IDEXPCPlus4),.SignEXT_i(SignEXTOffset),.IDEXSignEXT(IDEXSignEXT),.Instruction(IFIDInstruction),.IDEXInstruction(IDEXInstruction)
     ,.WriteBackDst(RegDstIn),.IDEXRegRd(IDEXRegRd),.RegWrite(RegWrite),.IDEXRegWrite(IDEXRegWrite)
-    ,.ALUOp(ALUOp),.IDEXALUOp(IDEXALUOp),.MemRead(IDEXMemRead),.MemWrite(IDEXMemWrite),.NPCType(IDEXNPCType)
-    ,.MemRBits(IDEXMemRBits),.MemWrBits(IDEXMemWrBits),.MemtoReg(IDEXMemtoReg),.ALUSrc_A(IDEXALUSrc_A),.ALUSrc_B(IDEXALUSrc_B),.JumpSrc(JumpSrc),.IDEXJumpSrc(IDEXJumpSrc));
+    ,.ALUOp(ALUOp),.IDEXALUOp(IDEXALUOp),.MemRead(MemRead),.IDEXMemRead(IDEXMemRead),.MemWrite(MemWrite),.IDEXMemWrite(IDEXMemWrite),.NPCType(NPCType),.IDEXNPCType(IDEXNPCType)
+    ,.MemRBits(MemRBits),.IDEXMemRBits(IDEXMemRBits),.MemWrBits(MemWrBits),.IDEXMemWrBits(IDEXMemWrBits),.MemtoReg(MemtoReg),.IDEXMemtoReg(IDEXMemtoReg),.ALUSrc_A(Sig_ALUSrcA),.IDEXALUSrc_A(IDEXALUSrc_A),.ALUSrc_B(Sig_ALUSrcB),.IDEXALUSrc_B(IDEXALUSrc_B)
+    ,.JumpSrc(JumpSrc),.IDEXJumpSrc(IDEXJumpSrc));
 
 
 //------------------------EX Stage--------------------------
@@ -144,7 +146,7 @@ module MIPS(clk,rst);
 
     //MUX_ALUSrcA
     wire [31:0] ALUSrcAData;
-    mux2 MUX_ALUSrcA(.d0(ALUSrcA_First),.d1(IDEXInstruction[10:6]),.s(IDEXALUSrc_A),.y(ALUSrcAData));
+    mux4 MUX_ALUSrcA(.d0(ALUSrcA_First),.d1({27'b0,IDEXInstruction[10:6]}),.s(IDEXALUSrc_A),.y(ALUSrcAData));
 
     //JumpAddress unit
     //ALUSrcA_First为Forward后的结果，可以解决jalr，jr中使用rs的数据冒险问题
@@ -157,7 +159,7 @@ module MIPS(clk,rst);
 
     //MUX_ALUSrcB
     wire [31:0] ALUSrcBData;
-    mux2 MUX_ALUSrcB(.d0(ALUSrcB_First),.d1(SignEXTOffset),.s(IDEXALUSrc_B),.y(ALUSrcBData));
+    mux4 MUX_ALUSrcB(.d0(ALUSrcB_First),.d1(SignEXTOffset),.s(IDEXALUSrc_B),.y(ALUSrcBData));
 
     //ALU
     wire Zero;
@@ -184,9 +186,9 @@ module MIPS(clk,rst);
     wire [31:0] EXMEMPCPlus4;
     wire [31:0] EXMEMMemWriteData;
     wire EXMEMMemWrite;
-    wire EXMEMMemWrBits;
+    wire [1:0] EXMEMMemWrBits;
     wire EXMEMMemRead;
-    wire [1:0] EXMEMMemRBits;
+    wire [2:0] EXMEMMemRBits;
     wire [1:0] EXMEMMemtoReg;
     EXMEMReg EXMEMReg(
      .clk(clk),

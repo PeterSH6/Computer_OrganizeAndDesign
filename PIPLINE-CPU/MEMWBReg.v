@@ -30,7 +30,7 @@ initial
         MEMWBMemtoReg  <= 2'b0;
     end
 
-always @(*)
+always @(negedge clk)
     begin
         if(rst)
         begin

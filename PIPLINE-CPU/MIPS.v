@@ -54,7 +54,7 @@ module MIPS(clk,rst);
    wire IFIDFlush;
    wire [31:0] IFIDInstruction;
    wire [31:0] IFIDPCPlus4;
-   IFIDReg IFIDReg(.clk(clk),.rst(rst),.IFIDStall(IFIDStall),.IFIDFlush(IFIDFlush),.PCPlus4_i(PC_o),.Instruction_i(Instruction),.PCPlus4_o(IFIDPCPlus4),.IFIDInstruction(IFIDInstruction));
+   IFIDReg IFIDReg(.clk(clk),.rst(rst),.IFIDStall(IFIDStall),.IFIDFlush(IFIDFlush),.PCPlus4_i(PCPlus4),.Instruction_i(Instruction),.PCPlus4_o(IFIDPCPlus4),.IFIDInstruction(IFIDInstruction));
 
 
 //-------------------------ID Stage-----------------------------
@@ -159,7 +159,7 @@ module MIPS(clk,rst);
 
     //MUX_ALUSrcB
     wire [31:0] ALUSrcBData;
-    mux4 MUX_ALUSrcB(.d0(ALUSrcB_First),.d1(SignEXTOffset),.s(IDEXALUSrc_B),.y(ALUSrcBData));
+    mux4 MUX_ALUSrcB(.d0(ALUSrcB_First),.d1(IDEXSignEXT),.s(IDEXALUSrc_B),.y(ALUSrcBData));
 
     //ALU
     wire Zero;
@@ -244,7 +244,7 @@ module MIPS(clk,rst);
     //--------------------------WB Stage---------------------------------
 
     //MemtoReg MUX
-    mux4 MUX_MemtoReg(.d0(MEMWBMemoryData),.d1(MEMWBALUResult),.d2(MEMWBPCPlus4),.s(MEMWBMemtoReg),.y(WriteDataFinal));
+    mux4 MUX_MemtoReg(.d0(MEMWBALUResult),.d1(MEMWBMemoryData),.d2(MEMWBPCPlus4),.s(MEMWBMemtoReg),.y(WriteDataFinal));
 
 
 

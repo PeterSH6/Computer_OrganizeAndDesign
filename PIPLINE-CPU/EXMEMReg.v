@@ -42,7 +42,7 @@ initial
         EXMEMALUResult<= 32'b0;
     end
 
-always @(negedge clk)
+always @(posedge clk)
     begin
         if(rst)
         begin

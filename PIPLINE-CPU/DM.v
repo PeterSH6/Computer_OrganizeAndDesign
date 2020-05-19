@@ -17,7 +17,7 @@ module DM(
 			Data_Memory[i] <= 0;
 		end
     
-    always@(posedge clk)//前半周期写入
+    always@(negedge clk)//前半周期写入
     begin
         if(MemWr == 1)
             begin

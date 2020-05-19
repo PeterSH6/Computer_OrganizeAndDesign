@@ -14,7 +14,7 @@ module IFIDReg(clk,rst,IFIDStall,IFIDFlush,PCPlus4_i,PCPlus4_o,Instruction_i,IFI
         IFIDInstruction <= 32'b0;
     end
 
-    always @(negedge clk)//在后半周期更新寄存器
+    always @(posedge clk)//在后半周期更新寄存器
     begin
         if(rst)
         begin

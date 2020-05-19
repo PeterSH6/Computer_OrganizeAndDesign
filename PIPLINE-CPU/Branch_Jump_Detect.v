@@ -17,18 +17,18 @@ begin
     begin
         if(Zero == 1) //说明预测正确，继续PC+4
         begin
-            $display("预测正确");
+            $display("predict right");
             NextType <= 2'b00;
         end
         else //预测错误，回到IDEXPC+4
         begin
-            $display("预测错误");
+            $display("predict wrong");
             NextType <= 2'b01; //IDEXPC+4
         end
     end
     `Jump:
     begin
-        $display("下一条Jump");
+        $display("next Instr is Jump");
         NextType <= 2'b10; //JumpPC
     end
     endcase

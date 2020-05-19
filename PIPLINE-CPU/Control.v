@@ -22,7 +22,7 @@ module Control(clk,rst,Op,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
     begin
         {MemRead,MemWrite,RegWrite} <= 3'b0;
         NPCType <= 2'b00;
-        ALUOp <= 4'b0;
+        ALUOp <= 4'b0000;
         MemRBits <= 3'b0;
         MemWrBits <= 2'b0;
         MemtoReg <= 2'b0;
@@ -32,7 +32,22 @@ module Control(clk,rst,Op,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
         PCSrc <= 1'b0;
     end
           
-    always@(posedge clk)
+    always@(*)
+    begin
+    if(rst)
+    begin
+        {MemRead,MemWrite,RegWrite} <= 3'b0;
+        NPCType <= 2'b00;
+        ALUOp <= 4'b0000;
+        MemRBits <= 3'b0;
+        MemWrBits <= 2'b0;
+        MemtoReg <= 2'b0;
+        ALUSrc_A <= 2'b0;
+        ALUSrc_B <= 2'b0;
+        RegDst <= 2'b0;
+        PCSrc <= 1'b0;
+    end
+    else
     begin
         case(Op)
         //-------------Rtype jalr jr---------------------
@@ -633,5 +648,6 @@ module Control(clk,rst,Op,Funct,Rs,Rt,PCSrc,NPCType,RegDst,MemRead,MemtoReg,ALUO
             JumpSrc <= 1'b0 ; // PC[31:28] + <<2 + 00
         end
         endcase
+    end
     end
 endmodule

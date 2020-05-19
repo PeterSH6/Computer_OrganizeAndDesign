@@ -46,7 +46,11 @@ always @(*)
             ForwardA <= 2'b00;
             ForwardB <= `MEMWBForward;
             end  
-        else 
+        else//没有Forward需要还原！！！
+            begin
             $display("NoForward");
+            ForwardA <= 2'b00;
+            ForwardB <= 2'b00;
+            end
     end
 endmodule

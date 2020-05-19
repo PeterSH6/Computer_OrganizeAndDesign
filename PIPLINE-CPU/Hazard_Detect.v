@@ -48,7 +48,7 @@ always @(*)
                         PCSrc <= 2'b00;  //此处选择PC+4，因为预测正确，且发生，所以继续执行
                         IFIDStall <= 1'b0;
                         IFIDFlush <= 1'b0;
-                        IDEXFlush <= 1'b0;
+                        IDEXFlush <= 1'b1;
                         $display("Predict right PC+4");
                     end
                     `BranchWrong:

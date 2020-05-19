@@ -52,7 +52,7 @@ always @(*)
             ForwardB <= `MEMWBForward;
             end 
         //Store需要toMEM,与前面EX级forward分开考虑。
-        if(EXMEMMemWrite && (MEMWBRegRd == EXMEMRegRd) && (MEMWBRegRd != 5'b0) && (MEMWBRegRd != 5'b11111))
+        if(MEMWBMemRead &&  EXMEMMemWrite && (MEMWBRegRd == EXMEMRegRd) && (MEMWBRegRd != 5'b0) && (MEMWBRegRd != 5'b11111))
             begin
             $display("ForwardC--MEMWB->MEM");
             ForwardC <= 1'b1;

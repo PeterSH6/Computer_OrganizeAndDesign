@@ -50,7 +50,7 @@ module MIPS(clk,rst);
 
 //-------------------------ID Stage-----------------------------
     //RF
-    wire [4:0] writeRegister; //从MEM/WB中返回
+    wire [4:0] MEMWBRegRd; //从MEM/WB中返回
     wire [31:0]WriteDataFinal; //从MEM/WB中返回，ALUResult或者Load
     wire [31:0] ReadData1;
     wire [31:0] ReadData2;
@@ -59,7 +59,7 @@ module MIPS(clk,rst);
     .RFWr(MEMWBRegWrite),
     .A1(IFIDInstruction[25:21]),
     .A2(IFIDInstruction[20:16]),
-    .A3(writeRegister),
+    .A3(MEMWBRegRd),
     .WD(WriteDataFinal),.RD1(ReadData1),.RD2(ReadData2));
 
     //MUX_RegDst;
@@ -235,6 +235,8 @@ module MIPS(clk,rst);
 
     //--------------------------WB Stage---------------------------------
 
+    //MemtoReg MUX
+    mux4 MUX_MemtoReg(d0(MEMWBMemoryData),.d1(MEMWBALUResult),.d2(MEMWBPCPlus4),.s(MEMWBMemtoReg),.y(WriteDataFinal));
 
 
 

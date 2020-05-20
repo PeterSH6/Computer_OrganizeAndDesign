@@ -8,12 +8,12 @@ module Branch_Jump_Detect(
 always@(*)
 begin
     case(NPCType)
-    `PCPlus4:
+    `NPC_PLUS4:
     begin
         $display("PC+4");
         NextType <= 2'b00; //选择PC+4 
     end
-    `Branch:
+    `NPC_BRANCH:
     begin
         if(Zero == 1) //说明预测正确，继续PC+4
         begin
@@ -26,7 +26,7 @@ begin
             NextType <= 2'b10; //IDEXPC+4
         end
     end
-    `Jump:
+    `NPC_JUMP:
     begin
         $display("next Instr is Jump");
         NextType <= 2'b11; //JumpPC
